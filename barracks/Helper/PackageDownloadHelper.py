@@ -1,14 +1,11 @@
 class PackageDownloadHelper: 
 
-	_apiKey = None
-
 	def __init__(apiKey):
-		self._apiKey = apiKey
+		self.apiKey = apiKey
 		
 
 	def downloadPackage(tmpPath, finalPath, updateDetail, callBack):
-   	# Download the file
-
+   	
     url = updateDetail.packageInfo.url
 
     f = self.download_file(url, tmpPath)
@@ -19,7 +16,7 @@ class PackageDownloadHelper:
 
   def download_file(url, tmpPath):
   	
-    headers = {'Authorization': self._apiKey,'Content-Type': 'application/json'}
+    headers = {'Authorization': self.apiKey,'Content-Type': 'application/json'}
 
     r = requests.get(url, stream=True, headers=headers)
 

@@ -1,12 +1,9 @@
 import requests
 class UpdateCheckerHelper:
 
-	_apiKey = None
-	_baseUrl = None
-
 	def __init__(apiKey, baseUrl):
-		self._apiKey = apiKey
-		self._baseUrl = baseUrl 
+		self.apiKey = apiKey
+		self.baseUrl = baseUrl 
 
 	
 	def checkUpdate(updateDetailRequest, callBack):
@@ -14,7 +11,7 @@ class UpdateCheckerHelper:
 		headers = {'Authorization': self._apiKey,'Content-Type': 'application/json'}
     
     checkUpdateData = {
-      'unitId': request._unitId,
+      'unitId': request.unitId,
       'versionId': request.versionId
     }
 

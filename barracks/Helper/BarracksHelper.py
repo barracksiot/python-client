@@ -1,14 +1,9 @@
 class BarracksHelper:
 
-	_apiKey = None
-	_baseUrl = None
+	baseUrl = "www.baseurl-de-barracks.io"
 
-	packageDownloadHeler = None
-	updateChekerHelper = None
-
-	def __init__( apiKey, baseUrl = None):
+	def __init__( apiKey, _baseUrl = None):
 		self.apiKey = apiKey
-		self._baseUrl = baseUrl if baseUrl is not None else "goChercherLaBaseUrlQqpart" 
-
+		self.baseUrl = _baseUrl # BarracksHelper.baseUrl should be called if self.baseUrl is None 
 		self.packageDownloadHeler = PackageDownloadHeler(apiKey)
-		self.updateChekerHelper = UpdateChekerHelper(apiKey, self._baseUrl)
+		self.updateChekerHelper = UpdateChekerHelper(apiKey, self.baseUrl)
