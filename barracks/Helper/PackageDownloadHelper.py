@@ -1,6 +1,10 @@
+import hashlib
 import os
 import sys
 import requests
+
+def check_md5(file_path, md5):
+    return md5 == hashlib.md5(open(file_path, 'rb').read()).hexdigest()
 
 
 class PackageDownloadHelper:
