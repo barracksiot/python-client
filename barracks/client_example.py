@@ -54,6 +54,6 @@ def check_update_callback(*args):
 
 
 # Perform a simple check
-request = UpdateDetailRequest.UpdateDetailRequest("v1", "pod", "{}")
+request = UpdateDetailRequest.UpdateDetailRequest("v1", "MyDevice", "{\"AnyCustomData\":\"any_value\"}")
 checkHelper = bh.updateCheckerHelper
 checkHelper.check_update(request, check_update_callback)
