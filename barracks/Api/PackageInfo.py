@@ -5,6 +5,6 @@ class PackageInfo:
 
     def __init__(self, json=None):
         if json is not None:
-            _url = json['packageInfo']
+            _url = json['url']
             _md5 = json['md5']
             _size = json['size']

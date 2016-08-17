@@ -8,6 +8,9 @@ class UpdateDetail:
 
     def __init__(self, json=None):
         if json is not None:
-            _versionId = json['version_id']
-            _packageInfo = PackageInfo(json['packageInfo'])
-            _properties = json['properties']
+            self._versionId = json()['versionId']
+            self._packageInfo = PackageInfo(json()['packageInfo'])
+            self._properties = json()['properties']
+
+    def get_package_info(self):
+        return self._packageInfo

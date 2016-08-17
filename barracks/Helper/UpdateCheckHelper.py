@@ -24,9 +24,8 @@ class UpdateCheckerHelper:
             'versionId': request.versionId
         }
         print(self._baseUrl)
-        print(check_update_data)
         rep = requests.post(self._baseUrl, data=json.dumps(check_update_data), headers=headers, verify=False)
-        print(rep.json)
+        print("json %s" % rep.json())
 
         if rep.status_code == 200:
             if rep.json is not None:
