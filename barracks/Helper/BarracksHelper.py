@@ -20,3 +20,6 @@ class BarracksHelper:
 
         self.packageDownloadHelper = PackageDownloadHelper(api_key)
         self.updateCheckerHelper = UpdateCheckerHelper(api_key, self._baseUrl)
+
+    def get_api_key(self):
+        return self._apiKey

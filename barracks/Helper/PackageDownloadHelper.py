@@ -18,7 +18,7 @@ class PackageDownloadHelper:
 
     def download_file(self, url, tmpPath):
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
-        r = requests.get(url, stream=True, headers=headers)
+        r = requests.get(url, stream=True, headers=headers, verify=False)
         with open(tmpPath, 'wb') as f:
             print('Start downloading')
             sys.stdout.flush()
