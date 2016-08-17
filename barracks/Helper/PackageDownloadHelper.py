@@ -2,6 +2,8 @@ import hashlib
 import os
 import sys
 import requests
+from Api import ApiError
+
 
 def check_md5(file_path, md5):
     return md5 == hashlib.md5(open(file_path, 'rb').read()).hexdigest()
@@ -14,11 +16,22 @@ class PackageDownloadHelper:
         self._apiKey = api_key
 
     def download_package(self, temporary_path, update_detail, callback):
+        """
+
+        :type callback: function
+        :type temporary_path: string
+        :type update_detail: UpdateDetail.UpdateDetail
+        """
         # Download the file
-        url = update_detail.packageInfo.url
+        url = update_detail.get_package_info().get_url()
         f = self.download_file(url, temporary_path)
         fullPath = os.path.realpath(f)
-        callback(f)
+
+        if check_md5(fullPath, update_detail.get_package_info().get_md5()):
+            print("update url = %s" % update_detail.get_package_info().get_url())
+            callback(f)
+        else :
+            callback(ApiError.ApiError("Md5 does not match"))
 
     def download_file(self, url, tmpPath):
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
@@ -30,4 +43,3 @@ class PackageDownloadHelper:
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
         return tmpPath
-

@@ -1,6 +1,6 @@
 import json
 import requests
-import Api
+from Api import ApiError, UpdateDetail
 
 
 class UpdateCheckerHelper:
@@ -14,7 +14,7 @@ class UpdateCheckerHelper:
     def check_update(self, request, callback):
         """
 
-        :type callback: basestring
+        :type callback: function
         :type request: UpdateDetailRequest
         """
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
@@ -29,10 +29,8 @@ class UpdateCheckerHelper:
 
         if rep.status_code == 200:
             if rep.json is not None:
-                return Api.UpdateDetail.UpdateDetail(rep.json)
+                callback(UpdateDetail.UpdateDetail(rep.json))
             else:
-                print(" > Error: Response 200 without json")
+                callback(ApiError.ApiError(" > Error: Response 200 without json"),rep.status_code)
         else:
-            print(" > Error: status code %d" % rep.status_code)
-
-        return None
+            callback(ApiError.ApiError("Error", rep.status_code))
