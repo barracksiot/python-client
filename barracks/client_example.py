@@ -5,7 +5,7 @@ from Helper import BarracksHelper, PackageDownloadHelper
 bh = BarracksHelper.BarracksHelper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567df2654984fffef2a67be", "https://barracks.ddns.net/")
 
 # Perform a simple check
-request = UpdateDetailRequest.UpdateDetailRequest("v1", "pod", "{}")
+request = UpdateDetailRequest.UpdateDetailRequest("v1", "MyDevice", "{\"AnyCustomData\":\"any_value\"}")
 checkHelper = bh.updateCheckerHelper
 update = checkHelper.check_update(request, None)
 
