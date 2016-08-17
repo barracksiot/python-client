@@ -7,18 +7,24 @@ class UpdateCheckerHelper:
     _apiKey = None
     _baseUrl = None
 
-    def __init__(self, apiKey, baseUrl):
-        self._apiKey = apiKey
-        self._baseUrl = baseUrl
+    def __init__(self, api_key, base_url):
+        self._apiKey = api_key
+        self._baseUrl = base_url
 
-    def checkUpdate(self, updateDetailRequest, callBack):
+    def check_update(self, request, callback):
+        """
+
+        :type callback: basestring
+        :type request: UpdateDetailRequest
+        """
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
 
-        checkUpdateData = {
-            'unitId': updateDetailRequest.unitId,
-            'versionId': updateDetailRequest.versionId
+        check_update_data = {
+            'unitId': request.unitId,
+            'versionId': request.versionId
         }
-        rep = requests.post(self._baseUrl, json=checkUpdateData, headers=headers)
+        print(self._baseUrl)
+        rep = requests.post(self._baseUrl, check_update_data, headers=headers)
 
         if rep.status_code == 200:
             if rep.json is not None:

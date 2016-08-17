@@ -1,1 +1,1 @@
-__all__ = ["UpdateDetail"]
+__all__ = ["UpdateDetail", "UpdateDetailRequest"]
