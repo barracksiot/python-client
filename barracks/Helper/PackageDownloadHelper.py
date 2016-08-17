@@ -1,6 +1,5 @@
 import os
 import sys
-
 import requests
 
 
@@ -26,5 +25,5 @@ class PackageDownloadHelper:
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
-
         return tmpPath
+
