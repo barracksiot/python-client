@@ -15,15 +15,15 @@ def download_package_callback(*args):
     if args:
         # ApiError
         if isinstance(args[0], ApiError.ApiError):
-            print "Message : " + args[0].get_message()
+            print("Message : " + args[0].get_message())
 
         # Got file path
         else:
             file_path = args[0].__str__()
             if os.path.isfile(file_path):
-                print "File downloaded at " + file_path.__str__()
+                print("File downloaded at " + file_path.__str__())
             else:
-                print "File Error"
+                print("File Error")
 
 
 def check_update_callback(*args):
@@ -39,10 +39,10 @@ def check_update_callback(*args):
 
         # args[0] is an ApiError
         elif isinstance(args[0], ApiError.ApiError):
-            print "Message : " + args[0].get_message()
+            print("Message : " + args[0].get_message())
 
         else:
-            print args[0].__str__()
+            print(args[0].__str__())
 
 
 # Perform a simple check

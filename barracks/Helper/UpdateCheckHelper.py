@@ -25,12 +25,15 @@ class UpdateCheckerHelper:
         }
         print(self._baseUrl)
         rep = requests.post(self._baseUrl, data=json.dumps(check_update_data), headers=headers, verify=False)
-        print("json %s" % rep.json())
+        print("json %s" % rep.json)
 
         if rep.status_code == 200:
             if rep.json is not None:
-                callback(UpdateDetail.UpdateDetail(rep.json))
+                callback(UpdateDetail.UpdateDetail(rep.json()))
+                return rep.json()
             else:
                 callback(ApiError.ApiError(" > Error: Response 200 without json"),rep.status_code)
+                return rep.json()
         else:
             callback(ApiError.ApiError("Error", rep.status_code))
+            return rep.json()

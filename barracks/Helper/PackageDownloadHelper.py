@@ -30,8 +30,11 @@ class PackageDownloadHelper:
         if check_md5(full_path, update_detail.get_package_info().get_md5()):
             print("update url = %s" % update_detail.get_package_info().get_url())
             callback(f)
+            return True
         else:
-            callback(ApiError.ApiError("Md5 does not match"))
+            error = ApiError.ApiError("Md5 does not match")
+            callback(error)
+            return error
 
     def download_file(self, url, tmp_path):
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
