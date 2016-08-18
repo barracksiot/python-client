@@ -10,7 +10,7 @@ bh = BarracksHelper.BarracksHelper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567
 
 def download_package_callback(*args):
     """
-    MY download package callback to handle file
+    MY download package callback to handle the downloaded file
     """
     if args:  # If args is not empty.
         # args[0] is UpdateDetail"
@@ -21,7 +21,7 @@ def download_package_callback(*args):
             print "Error code : " + error_code if error_code is not None else ""
             print "Message : " + message if message is not None else " Error"
 
-        else :
+        else:
             # Got file path
             file_path = args[0].__str__()
             if os.path.isfile(file_path):
@@ -40,7 +40,6 @@ def check_update_callback(*args):
             update = args[0]
             ph = PackageDownloadHelper.PackageDownloadHelper(bh.apiKey)
             ph.download_package("./dafile", update, download_package_callback)
-
 
         # No update available or Error
         elif isinstance(args[0], ApiError.ApiError):
