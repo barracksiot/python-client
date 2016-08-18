@@ -1,4 +1,4 @@
-class PackageInfo:
+class package_info:
     _url = None
     _md5 = None
     _size = None

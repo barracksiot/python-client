@@ -1,9 +1,10 @@
 import json
 import requests
-from barracks_sdk import ApiError, UpdateDetail
+from api_error import api_error
+from update_detail import update_detail
 
 
-class UpdateCheckerHelper:
+class update_check_helper:
     _apiKey = None
     _baseUrl = None
 
@@ -15,7 +16,7 @@ class UpdateCheckerHelper:
         """
 
         :type callback: function
-        :type request: UpdateDetailRequest.UpdateDetailRequest
+        :type request: update_detail_request.update_detail_request
         """
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
 
@@ -29,11 +30,11 @@ class UpdateCheckerHelper:
 
         if rep.status_code == 200:
             if rep.json is not None:
-                callback(UpdateDetail.UpdateDetail(rep.json()))
+                callback(update_detail(rep.json()))
                 return rep.json()
             else:
-                callback(ApiError.ApiError(" > Error: Response 200 without json"),rep.status_code)
+                callback(api_error.ApiError(" > Error: Response 200 without json"), rep.status_code)
                 return rep.json()
         else:
-            callback(ApiError.ApiError("Error", rep.status_code))
+            callback(api_error.ApiError("Error", rep.status_code))
             return rep.json()

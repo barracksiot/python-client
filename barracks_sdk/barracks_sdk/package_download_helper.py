@@ -2,14 +2,14 @@ import hashlib
 import os
 import sys
 import requests
-from barracks_sdk import ApiError
+from api_error import api_error
 
 
 def check_md5(file_path, md5):
     return md5 == hashlib.md5(open(file_path, 'rb').read()).hexdigest()
 
 
-class PackageDownloadHelper:
+class package_download_helper:
     _apiKey = None
 
     def __init__(self, api_key):
@@ -20,7 +20,7 @@ class PackageDownloadHelper:
 
         :type callback: function
         :type temporary_path: string
-        :type update_detail: UpdateDetail.UpdateDetail
+        :type update_detail: update_detail.update_detail
         """
         # Download the file
         url = update_detail.get_package_info().get_url()
@@ -32,7 +32,7 @@ class PackageDownloadHelper:
             callback(f)
             return True
         else:
-            error = ApiError.ApiError("Md5 does not match")
+            error = api_error("Md5 does not match")
             callback(error)
             return error
 
