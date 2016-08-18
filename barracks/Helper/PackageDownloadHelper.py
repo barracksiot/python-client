@@ -1,7 +1,12 @@
+import hashlib
 import os
 import sys
-
 import requests
+from Api import ApiError
+
+
+def check_md5(file_path, md5):
+    return md5 == hashlib.md5(open(file_path, 'rb').read()).hexdigest()
 
 
 class PackageDownloadHelper:
@@ -11,20 +16,30 @@ class PackageDownloadHelper:
         self._apiKey = api_key
 
     def download_package(self, temporary_path, update_detail, callback):
-        # Download the file
-        url = update_detail.packageInfo.url
-        f = self.download_file(url, temporary_path)
-        fullPath = os.path.realpath(f)
-        callback(f)
+        """
 
-    def download_file(self, url, tmpPath):
+        :type callback: function
+        :type temporary_path: string
+        :type update_detail: UpdateDetail.UpdateDetail
+        """
+        # Download the file
+        url = update_detail.get_package_info().get_url()
+        f = self.download_file(url, temporary_path)
+        full_path = os.path.realpath(f)
+
+        if check_md5(full_path, update_detail.get_package_info().get_md5()):
+            print("update url = %s" % update_detail.get_package_info().get_url())
+            callback(f)
+        else:
+            callback(ApiError.ApiError("Md5 does not match"))
+
+    def download_file(self, url, tmp_path):
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
-        r = requests.get(url, stream=True, headers=headers)
-        with open(tmpPath, 'wb') as f:
+        r = requests.get(url, stream=True, headers=headers, verify=False)
+        with open(tmp_path, 'wb') as f:
             print('Start downloading')
             sys.stdout.flush()
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
-
-        return tmpPath
+        return tmp_path
