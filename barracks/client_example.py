@@ -10,19 +10,15 @@ bh = BarracksHelper.BarracksHelper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567
 
 def download_package_callback(*args):
     """
-    MY download package callback to handle the downloaded file
+    Callback to handle the downloaded file
     """
-    if args:  # If args is not empty.
-        # args[0] is UpdateDetail"
+    if args:
+        # ApiError
         if isinstance(args[0], ApiError.ApiError):
+            print "Message : " + args[0].get_message()
 
-            error_code = args[0].get_error_code()
-            message = args[0].get_message()
-            print "Error code : " + error_code if error_code is not None else ""
-            print "Message : " + message if message is not None else " Error"
-
+        # Got file path
         else:
-            # Got file path
             file_path = args[0].__str__()
             if os.path.isfile(file_path):
                 print "File downloaded at " + file_path.__str__()
@@ -32,23 +28,20 @@ def download_package_callback(*args):
 
 def check_update_callback(*args):
     """
-    My check_update call back to handle new available update
+    Callback to handle new update from UpdateCheckerHelper.check_update
     """
-    if args:  # If args is not empty.
-        # args[0] is UpdateDetail"
+    if args:
+        # args[0] is an UpdateDetail
         if isinstance(args[0], UpdateDetail.UpdateDetail):
             update = args[0]
             ph = PackageDownloadHelper.PackageDownloadHelper(bh.apiKey)
             ph.download_package("./dafile", update, download_package_callback)
 
-        # No update available or Error
+        # args[0] is an ApiError
         elif isinstance(args[0], ApiError.ApiError):
-            error_code = args[0].get_error_code()
-            message = args[0].get_message()
-            print "Error code : " + error_code if error_code is not None else ""
-            print "Message : " + message if message is not None else "Error without message"
+            print "Message : " + args[0].get_message()
 
-        else :
+        else:
             print args[0].__str__()
 
 

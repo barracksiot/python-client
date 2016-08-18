@@ -25,21 +25,21 @@ class PackageDownloadHelper:
         # Download the file
         url = update_detail.get_package_info().get_url()
         f = self.download_file(url, temporary_path)
-        fullPath = os.path.realpath(f)
+        full_path = os.path.realpath(f)
 
-        if check_md5(fullPath, update_detail.get_package_info().get_md5()):
+        if check_md5(full_path, update_detail.get_package_info().get_md5()):
             print("update url = %s" % update_detail.get_package_info().get_url())
             callback(f)
-        else :
+        else:
             callback(ApiError.ApiError("Md5 does not match"))
 
-    def download_file(self, url, tmpPath):
+    def download_file(self, url, tmp_path):
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
         r = requests.get(url, stream=True, headers=headers, verify=False)
-        with open(tmpPath, 'wb') as f:
+        with open(tmp_path, 'wb') as f:
             print('Start downloading')
             sys.stdout.flush()
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
-        return tmpPath
+        return tmp_path

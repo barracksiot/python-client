@@ -15,7 +15,7 @@ class UpdateCheckerHelper:
         """
 
         :type callback: function
-        :type request: UpdateDetailRequest
+        :type request: UpdateDetailRequest.UpdateDetailRequest
         """
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
 
