@@ -55,8 +55,8 @@ def download_package_callback(*args):
         if isinstance(args[0], ApiError.ApiError):
             print "Message : " + args[0].get_message()
 
+        # We've got the downloaded file path
         else:
-            # We've got the downloaded file path
             file_path = args[0].__str__()
             if os.path.isfile(file_path):
                 print "File downloaded at " + file_path.__str__()
