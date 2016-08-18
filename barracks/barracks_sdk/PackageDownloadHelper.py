@@ -2,7 +2,7 @@ import hashlib
 import os
 import sys
 import requests
-from Api import ApiError
+from barracks_sdk import ApiError
 
 
 def check_md5(file_path, md5):

@@ -1,10 +1,9 @@
 import json
 
 import pytest
-
-from Api import UpdateDetail, UpdateDetailRequest
-from Helper import BarracksHelper, PackageDownloadHelper
 from mock import MagicMock
+
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper
 
 
 @pytest.fixture()

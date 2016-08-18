@@ -1,6 +1,6 @@
 import json
 import requests
-from Api import ApiError, UpdateDetail
+from barracks_sdk import ApiError, UpdateDetail
 
 
 class UpdateCheckerHelper:

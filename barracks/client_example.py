@@ -1,7 +1,6 @@
 import os
 
-from Api import ApiError, UpdateDetail, UpdateDetailRequest
-from Helper import BarracksHelper, PackageDownloadHelper
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiError
 
 # Let's initialise the SDK with the API key and the base URL
 bh = BarracksHelper.BarracksHelper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567df2654984fffef2a67be",
