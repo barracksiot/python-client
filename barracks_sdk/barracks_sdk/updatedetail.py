@@ -14,3 +14,9 @@ class UpdateDetail:
 
     def get_package_info(self):
         return self._packageInfo
+
+    def get_properties(self):
+        return self._properties
+
+    def get_version_id(self):
+        return self._versionId
