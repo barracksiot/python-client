@@ -2,14 +2,14 @@ import hashlib
 import os
 import sys
 import requests
-from api_error import api_error
+from apierror import ApiError
 
 
 def check_md5(file_path, md5):
     return md5 == hashlib.md5(open(file_path, 'rb').read()).hexdigest()
 
 
-class package_download_helper:
+class PackageDownloadHelper:
     _apiKey = None
 
     def __init__(self, api_key):
@@ -20,7 +20,7 @@ class package_download_helper:
 
         :type callback: function
         :type temporary_path: string
-        :type update_detail: update_detail.update_detail
+        :type update_detail: UpdateDetail
         """
         # Download the file
         url = update_detail.get_package_info().get_url()
@@ -32,7 +32,7 @@ class package_download_helper:
             callback(f)
             return True
         else:
-            error = api_error("Md5 does not match")
+            error = ApiError("MD5 does not match")
             callback(error)
             return error
 
