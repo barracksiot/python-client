@@ -12,7 +12,7 @@ def main():
         description='This will make a request to Barracks to check if an update is available. If yes, it will be downloaded.')
     group = parser.add_argument_group('authentication')
     group.add_argument('-a', '--api_key', help='Your Barracks API key')
-    parser.add_argument('-d', '--destination', help='Destination for the downloaded package. Default: ./', default='./')
+    parser.add_argument('-d', '--destination', help='Destination for the downloaded package. Default: ./', default='./update_package')
     parser.add_argument('-u', '--base_url', help='Alternative URL for Barracks API. Default: http://app.barracks.io')
 
     args = parser.parse_args()
@@ -33,7 +33,7 @@ def main():
 class Client:
     _api_key = ''
     _base_url = 'http://app.barracks.io/'
-    _destination = './'
+    _destination = './update_package'
     _bh = None
 
     def __init__(self, api_key, base_url, destination):
@@ -60,7 +60,7 @@ class Client:
 
             # Got file path
             else:
-                file_path = args[0].__str__()
+                file_path = args[1].__str__()
                 if os.path.isfile(file_path):
                     print("File downloaded at " + file_path.__str__())
                 else:
@@ -75,7 +75,7 @@ class Client:
             if isinstance(args[0], UpdateDetail):
                 update = args[0]
                 ph = PackageDownloadHelper(self._bh.apiKey)
-                ph.download_package(self.destination, update, self.download_package_callback)
+                ph.download_package(self._destination, update, self.download_package_callback)
 
             # args[0] is an ApiError
             elif isinstance(args[0], ApiError):
