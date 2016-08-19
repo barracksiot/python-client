@@ -34,7 +34,7 @@ class UpdateCheckHelper:
                 return rep.json()
             else:
                 callback(ApiError(" > Error: Response 200 without json"), rep.status_code)
-                return rep.json()
+                return None
         else:
             callback(ApiError("Error", rep.status_code))
-            return rep.json()
+            return None
