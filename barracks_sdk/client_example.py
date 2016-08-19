@@ -1,50 +1,89 @@
+import argparse
 import os
+import sys
 
-from barracks_sdk import update_detail, update_detail_request, package_download_helper, barracks_helper, api_error
+import barracks_sdk
 
-# Let's initialise the SDK with the API key and the base URL
-bh = barracks_helper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567df2654984fffef2a67be",
-                                   "https://barracks.ddns.net/")
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiError
 
 
-def download_package_callback(*args):
-    """
-    Callback to handle the downloaded file
-    """
-    if args:
-        # ApiError
-        if isinstance(args[0], api_error):
-            print("Message : " + args[0].get_message())
+def main():
+    parser = argparse.ArgumentParser(
+        description='This will make a request to Barracks to check if an update is available. If yes, it will be downloaded.')
+    group = parser.add_argument_group('authentication')
+    group.add_argument('-a', '--api_key', help='Your Barracks API key')
+    parser.add_argument('-d', '--destination', help='Destination for the downloaded package. Default: ./', default='./')
+    parser.add_argument('-u', '--base_url', help='Alternative URL for Barracks API. Default: http://app.barracks.io')
 
-        # Got file path
-        else:
-            file_path = args[0].__str__()
-            if os.path.isfile(file_path):
-                print("File downloaded at " + file_path.__str__())
+    args = parser.parse_args()
+
+    api_key = args.api_key
+    base_url = args.base_url
+    destination = args.destination
+
+    if api_key is '':
+        print('client_example.py -a <your_api_key> -u <optionnal_alternative_base_url>')
+        sys.exit(2)
+    else:
+        # Let's initialise the SDK with the API key and the base URL
+        client = Client(api_key, base_url, destination)
+        client.check_for_updates()
+
+
+class Client:
+    _api_key = ''
+    _base_url = 'http://app.barracks.io/'
+    _destination = './'
+    _bh = None
+
+    def __init__(self, api_key, base_url, destination):
+        self._api_key = api_key
+        self._base_url = base_url
+        self._destination = destination
+        self._bh = BarracksHelper(api_key, base_url)
+
+    def check_for_updates(self):
+        # Perform a simple check
+        request = UpdateDetailRequest("Python SDK %s" % barracks_sdk.__version__, "A device example",
+                                        "{\"AnyCustomData\":\"any_value\"}")
+        ch = self._bh.updateCheckerHelper
+        ch.check_update(request, self.check_update_callback)
+
+    def download_package_callback(*args):
+        """
+        Callback to handle the downloaded file
+        """
+        if args:
+            # ApiError
+            if isinstance(args[0], ApiError):
+                print("Message : " + args[0].get_message())
+
+            # Got file path
             else:
-                print("File Error")
+                file_path = args[0].__str__()
+                if os.path.isfile(file_path):
+                    print("File downloaded at " + file_path.__str__())
+                else:
+                    print("File Error")
+
+    def check_update_callback(self, *args):
+        """
+        Callback to handle new update from UpdateCheckerHelper.check_update
+        """
+        if args:
+            # args[0] is an UpdateDetail
+            if isinstance(args[0], UpdateDetail):
+                update = args[0]
+                ph = PackageDownloadHelper(self._bh.apiKey)
+                ph.download_package(self.destination, update, self.download_package_callback)
+
+            # args[0] is an ApiError
+            elif isinstance(args[0], ApiError):
+                print("Message : " + args[0].get_message())
+
+            else:
+                print(args[0].__str__())
 
 
-def check_update_callback(*args):
-    """
-    Callback to handle new update from UpdateCheckerHelper.check_update
-    """
-    if args:
-        # args[0] is an UpdateDetail
-        if isinstance(args[0], update_detail):
-            update = args[0]
-            ph = package_download_helper(bh.apiKey)
-            ph.download_package("./dafile", update, download_package_callback)
-
-        # args[0] is an ApiError
-        elif isinstance(args[0], api_error):
-            print("Message : " + args[0].get_message())
-
-        else:
-            print(args[0].__str__())
-
-
-# Perform a simple check
-request = update_detail_request("v1", "MyDevice", "{\"AnyCustomData\":\"any_value\"}")
-checkHelper = bh.updateCheckerHelper
-checkHelper.check_update(request, check_update_callback)
+if __name__ == "__main__":
+    main()

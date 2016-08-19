@@ -3,47 +3,58 @@ import json
 import pytest
 from mock import MagicMock
 
-from barracks_sdk import update_detail, update_detail_request, package_download_helper, barracks_helper, api_error
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiError
 
 
 @pytest.fixture()
 def init_helpers_and_mocks():
+    """
+    Create mocked objects and fake data to be used in the tests
+    """
     callback_fake = MagicMock()
-    bh = barracks_helper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567df2654984fffef2a67be",
-                                       "https://barracks.ddns.net/")
-    return callback_fake, bh
+    bh = BarracksHelper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567df2654984fffef2a67be",
+                         "https://barracks.ddns.net/")
+    upd_response = '{"packageInfo": {"size": 1925, "md5": "21fd9b37d2b458b42dc2e450699075ef", "url": "https://barracks.ddns.net/api/device/update/download/b640d7f2-31fd-4502-a8e1-bcf7df343f92"}, "properties": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
+    update_fake = UpdateDetail(json.loads(upd_response))
+
+    return callback_fake, bh, update_fake
 
 
 def test_check_update_properly_calls_callback(init_helpers_and_mocks):
+    """
+    Tests that the client ''check'' callback is called whatever comes from Barracks API
+    """
     callback_fake = init_helpers_and_mocks[0]
     bh = init_helpers_and_mocks[1]
 
-    request = update_detail_request("v1", "MyDevice", "{\"AnyCustomData\":\"any_value\"}")
+    request = UpdateDetailRequest("v1", "MyDevice", "{\"AnyCustomData\":\"any_value\"}")
     helper = bh.updateCheckerHelper
     helper.check_update(request, callback_fake)
     callback_fake.assert_called()
 
 
 def test_download_package_properly_calls_callback(init_helpers_and_mocks):
+    """
+    Tests that the client ''download'' callback is called whatever comes from Barracks API
+    """
     callback_fake = init_helpers_and_mocks[0]
     bh = init_helpers_and_mocks[1]
+    update_fake = init_helpers_and_mocks[2]
 
-    upd_response = '{"packageInfo": {"size": 1925, "md5": "21fd9b37d2b458b42dc2e450699075ef", "url": "https://barracks.ddns.net/api/device/update/download/b640d7f2-31fd-4502-a8e1-bcf7df343f92"}, "properties": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
-    update_fake = update_detail(json.loads(upd_response))
-
-    ph = package_download_helper(bh.apiKey)
+    ph = PackageDownloadHelper(bh.apiKey)
     ph.download_package("./anyfile", update_fake, callback_fake)
     callback_fake.assert_called()
 
 
 def test_download_package_properly_calls_callback_with_good_params(init_helpers_and_mocks):
+    """
+    Tests that the client ''download'' callback is called with appropriate parameters when success
+    """
     callback_fake = init_helpers_and_mocks[0]
     bh = init_helpers_and_mocks[1]
+    update_fake = init_helpers_and_mocks[2]
 
-    upd_response = '{"packageInfo": {"size": 1925, "md5": "21fd9b37d2b458b42dc2e450699075ef", "url": "https://barracks.ddns.net/api/device/update/download/b640d7f2-31fd-4502-a8e1-bcf7df343f92"}, "properties": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
-    update_fake = update_detail(json.loads(upd_response))
-
-    ph = package_download_helper(bh.apiKey)
+    ph = PackageDownloadHelper(bh.apiKey)
     result = ph.download_package("./anyfile", update_fake, callback_fake)
 
     callback_fake.assert_called_with("./anyfile")
@@ -51,13 +62,14 @@ def test_download_package_properly_calls_callback_with_good_params(init_helpers_
 
 
 def test_download_package_properly_calls_callback_with_error(init_helpers_and_mocks):
+    """
+    Tests that the client ''download'' callback is called with error object when fail
+    """
     callback_fake = init_helpers_and_mocks[0]
     bh = init_helpers_and_mocks[1]
+    update_fake = init_helpers_and_mocks[2]
 
-    upd_response = '{"packageInfo": {"size": 1925, "md5": "badmd5", "url": "https://barracks.ddns.net/api/device/update/download/b640d7f2-31fd-4502-a8e1-bcf7df343f92"}, "properties": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
-    update_fake = update_detail(json.loads(upd_response))
-
-    ph = package_download_helper(bh.apiKey)
+    ph = PackageDownloadHelper(bh.apiKey)
     obj = ph.download_package("./anyfile", update_fake, callback_fake)
 
-    callback_fake.assert_called_with(obj)
+    callback_fake.assert_called_with("./anyfile")

@@ -1,4 +1,4 @@
-class update_detail_request:
+class UpdateDetailRequest:
     versionId = None
     unitId = None
     properties = None

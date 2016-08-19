@@ -1,10 +1,10 @@
 import json
 import requests
-from api_error import api_error
-from update_detail import update_detail
+from apierror import ApiError
+from updatedetail import UpdateDetail
 
 
-class update_check_helper:
+class UpdateCheckHelper:
     _apiKey = None
     _baseUrl = None
 
@@ -16,7 +16,7 @@ class update_check_helper:
         """
 
         :type callback: function
-        :type request: update_detail_request.update_detail_request
+        :type request: updatedetailrequest.UpdateDetailRequest
         """
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
 
@@ -30,11 +30,11 @@ class update_check_helper:
 
         if rep.status_code == 200:
             if rep.json is not None:
-                callback(update_detail(rep.json()))
+                callback(UpdateDetail(rep.json()))
                 return rep.json()
             else:
-                callback(api_error.ApiError(" > Error: Response 200 without json"), rep.status_code)
+                callback(ApiError(" > Error: Response 200 without json"), rep.status_code)
                 return rep.json()
         else:
-            callback(api_error.ApiError("Error", rep.status_code))
+            callback(ApiError("Error", rep.status_code))
             return rep.json()

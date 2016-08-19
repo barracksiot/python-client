@@ -24,6 +24,6 @@ setup(
         "Topic :: Home Automation",
     ],
     entry_points=None,
-    license="ALv2"
+    license="ALv2", requires=['requests']
 )
 
