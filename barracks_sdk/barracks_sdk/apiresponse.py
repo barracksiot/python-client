@@ -1,4 +1,4 @@
-class ApiError:
+class ApiResponse:
 
     _message = None
     _error_code = None

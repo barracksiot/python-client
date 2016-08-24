@@ -1,6 +1,6 @@
 import json
 import requests
-from apierror import ApiError
+from apiresponse import ApiResponse
 from updatedetail import UpdateDetail
 
 
@@ -32,10 +32,13 @@ class UpdateCheckHelper:
                 callback(UpdateDetail(response.json()))
                 return response.json()
             else:
-                callback(ApiError(' > Error: Response 200 without json'), response.status_code)
+                callback(ApiResponse(' > Error: Response 200 without json'), response.status_code)
                 return None
         else:
-            callback(ApiError('Error', response.status_code))
+            if response.status_code == '204':
+                callback(ApiResponse('No update available', response.status_code))
+            else:
+                callback(ApiResponse('Error', response.status_code))
             return None
 
     def get_update(self):

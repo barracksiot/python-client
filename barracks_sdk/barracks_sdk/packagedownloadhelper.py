@@ -2,7 +2,7 @@ import hashlib
 import os
 import sys
 import requests
-from apierror import ApiError
+from apiresponse import ApiResponse
 
 
 def check_md5(file_path, md5):
@@ -31,7 +31,7 @@ class PackageDownloadHelper:
             callback(file)
             return True
         else:
-            error = ApiError('MD5 does not match')
+            error = ApiResponse('MD5 does not match')
             callback(error)
             return error
 

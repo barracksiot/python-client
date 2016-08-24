@@ -4,7 +4,7 @@ import sys
 
 import barracks_sdk
 
-from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiError
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiResponse
 
 
 def main():
@@ -64,7 +64,7 @@ class Client:
                       % (update.get_version_id(), update.get_package_info().get_size(), self._destination, update.get_package_info().get_md5()))
 
             # args[0] is an ApiError
-            elif isinstance(args[0], ApiError):
+            elif isinstance(args[0], ApiResponse):
                 print('Message : ' + args[0].get_message())
 
             else:
@@ -76,7 +76,7 @@ class Client:
         """
         if args:
             # ApiError
-            if isinstance(args[0], ApiError):
+            if isinstance(args[0], ApiResponse):
                 print('Message : ' + args[0].get_message())
 
             # Got file path
