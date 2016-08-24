@@ -3,7 +3,7 @@ import json
 import pytest
 from mock import MagicMock
 
-from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiError
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiResponse
 
 
 @pytest.fixture()
@@ -41,7 +41,7 @@ def test_download_package_properly_calls_callback(init_helpers_and_mocks):
     bh = init_helpers_and_mocks[1]
     update_fake = init_helpers_and_mocks[2]
 
-    ph = PackageDownloadHelper(bh.apiKey)
+    ph = PackageDownloadHelper(bh.get_api_key())
     ph.download_package("./anyfile", update_fake, callback_fake)
     callback_fake.assert_called()
 
@@ -54,7 +54,7 @@ def test_download_package_properly_calls_callback_with_good_params(init_helpers_
     bh = init_helpers_and_mocks[1]
     update_fake = init_helpers_and_mocks[2]
 
-    ph = PackageDownloadHelper(bh.apiKey)
+    ph = PackageDownloadHelper(bh.get_api_key())
     result = ph.download_package("./anyfile", update_fake, callback_fake)
 
     callback_fake.assert_called_with("./anyfile")
@@ -69,7 +69,7 @@ def test_download_package_properly_calls_callback_with_error(init_helpers_and_mo
     bh = init_helpers_and_mocks[1]
     update_fake = init_helpers_and_mocks[2]
 
-    ph = PackageDownloadHelper(bh.apiKey)
+    ph = PackageDownloadHelper(bh.get_api_key())
     obj = ph.download_package("./anyfile", update_fake, callback_fake)
 
     callback_fake.assert_called_with("./anyfile")
