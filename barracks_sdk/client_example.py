@@ -21,7 +21,7 @@ def main():
     base_url = args.base_url
     destination = args.destination
 
-    if api_key is '':
+    if api_key is None:
         print('client_example.py -a <your_api_key> -u <optionnal_alternative_base_url>')
         sys.exit(2)
     else:
@@ -31,7 +31,7 @@ def main():
 
 
 class Client:
-    _api_key = ''
+    _api_key = None
     _base_url = 'http://app.barracks.io/'
     _destination = './update_package'
     _bh = None
@@ -44,27 +44,10 @@ class Client:
 
     def check_for_updates(self):
         # Perform a simple check
-        request = UpdateDetailRequest("Python SDK %s" % barracks_sdk.__version__, "A device example",
-                                        "{\"AnyCustomData\":\"any_value\"}")
+        request = UpdateDetailRequest('Python SDK %s' % barracks_sdk.__version__, 'A device example',
+                                        '{"AnyCustomData":"any_value"}')
         ch = self._bh.updateCheckerHelper
         ch.check_update(request, self.check_update_callback)
-
-    def download_package_callback(*args):
-        """
-        Callback to handle the downloaded file
-        """
-        if args:
-            # ApiError
-            if isinstance(args[0], ApiError):
-                print("Message : " + args[0].get_message())
-
-            # Got file path
-            else:
-                file_path = args[1].__str__()
-                if os.path.isfile(file_path):
-                    print("File downloaded at " + file_path.__str__())
-                else:
-                    print("File Error")
 
     def check_update_callback(self, *args):
         """
@@ -74,16 +57,36 @@ class Client:
             # args[0] is an UpdateDetail
             if isinstance(args[0], UpdateDetail):
                 update = args[0]
-                ph = PackageDownloadHelper(self._bh.apiKey)
+                print('downloading from %s' % update.get_package_info().get_url())
+                ph = PackageDownloadHelper(self._api_key)
                 ph.download_package(self._destination, update, self.download_package_callback)
+                print('%s (%s bytes) has been downloaded in %s - checksum: %s'
+                      % (update.get_version_id(), update.get_package_info().get_size(), self._destination, update.get_package_info().get_md5()))
 
             # args[0] is an ApiError
             elif isinstance(args[0], ApiError):
-                print("Message : " + args[0].get_message())
+                print('Message : ' + args[0].get_message())
 
             else:
                 print(args[0].__str__())
 
+    def download_package_callback(*args):
+        """
+        Callback to handle the downloaded file
+        """
+        if args:
+            # ApiError
+            if isinstance(args[0], ApiError):
+                print('Message : ' + args[0].get_message())
 
-if __name__ == "__main__":
+            # Got file path
+            else:
+                file_path = args[1].__str__()
+                if os.path.isfile(file_path):
+                    print('File downloaded at ' + file_path.__str__())
+                else:
+                    print('File Error')
+
+
+if __name__ == '__main__':
     main()

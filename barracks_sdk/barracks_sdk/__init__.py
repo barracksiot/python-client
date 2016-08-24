@@ -13,8 +13,8 @@ from updatecheckhelper import UpdateCheckHelper
 from updatedetail import UpdateDetail
 from updatedetailrequest import UpdateDetailRequest
 
-__all__ = ["UpdateDetail", "UpdateDetailRequest", "PackageDownloadHelper", "BarracksHelper", "ApiError",
-           "PackageInfo",
-           "UpdateCheckHelper"]
+__all__ = ['UpdateDetail', 'UpdateDetailRequest', 'PackageDownloadHelper', 'BarracksHelper', 'ApiError',
+           'PackageInfo',
+           'UpdateCheckHelper']
 
-__version__ = "0.0.4"
+__version__ = '0.0.6'
