@@ -1,9 +1,9 @@
 class UpdateDetailRequest:
     versionId = None
     unitId = None
-    properties = None
+    customClientData = None
 
-    def __init__(self, versionId, unitId, properties):
+    def __init__(self, versionId, unitId, customClientData):
         self.versionId = versionId
         self.unitId = unitId
-        self.properties = properties
+        self.customClientData = customClientData
