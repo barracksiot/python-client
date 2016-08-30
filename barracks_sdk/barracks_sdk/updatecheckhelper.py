@@ -22,7 +22,8 @@ class UpdateCheckHelper:
 
         check_update_data = {
             'unitId': request.unitId,
-            'versionId': request.versionId
+            'versionId': request.versionId,
+            'customClientData': request.customClientData
         }
         response = requests.post(self._baseUrl, data=json.dumps(check_update_data), headers=headers, verify=False)
 

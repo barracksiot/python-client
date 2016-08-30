@@ -32,7 +32,7 @@ def main():
 
 class Client:
     _api_key = None
-    _base_url = 'http://app.barracks.io/'
+    _base_url = 'https://app.barracks.io/'
     _destination = './update_package'
     _bh = None
 
