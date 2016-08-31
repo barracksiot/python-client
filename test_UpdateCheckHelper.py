@@ -33,6 +33,21 @@ def test_check_update_properly_calls_callback(init_helpers_and_mocks):
     callback_fake.assert_called()
 
 
+def test_check_update_properly_build_request_with_good_params(init_helpers_and_mocks):
+    """
+    Tests that the request is build and send with appropriate parameters
+    """
+    bh = init_helpers_and_mocks[1]
+    request = UpdateDetailRequest("v1", "MyDevice", "{\"AnyCustomData\":\"any_value\"}")
+    helper = bh.updateCheckerHelper
+    built_request = helper.build_request(request)
+    body = json.loads(built_request.body)
+
+    assert body['unitId'] == request.unitId
+    assert body['versionId'] == request.versionId
+    assert body['customClientData'] == request.customClientData
+
+
 def test_download_package_properly_calls_callback(init_helpers_and_mocks):
     """
     Tests that the client ''download'' callback is called whatever comes from Barracks API
