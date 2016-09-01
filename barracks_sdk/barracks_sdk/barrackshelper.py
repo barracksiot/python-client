@@ -14,6 +14,10 @@ class BarracksHelper:
         :type base_url: basestring
         :type api_key: basestring
         """
+        
+        if api_key is None:
+            raise ValueError("Field api_key is required")
+
         self._apiKey = api_key
         self._baseUrl = base_url if base_url is not None else 'https://app.barracks.io/'
 

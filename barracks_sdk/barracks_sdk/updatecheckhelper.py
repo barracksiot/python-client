@@ -11,15 +11,17 @@ class UpdateCheckHelper:
 
     def __init__(self, api_key, base_url):
         self._apiKey = api_key
-        self._baseUrl = base_url + 'api/device/update/check'
+        self._baseUrl = base_url + '/api/device/update/check'
 
-    def check_update(self, request, callback):
+    def check_update(self, update_detail_request, callback):
         """
         :type callback: function
-        :type request: UpdateDetailRequest
+        :type update_detail_request: UpdateDetailRequest
         """
 
-        prepared_request = self.build_request(request)
+        prepared_request = self.build_request(update_detail_request)
+
+        # Accept certificate even if another domain than the Barracks one is used
         response = requests.session().send(prepared_request, verify=False)
 
         if response.status_code == 200:
@@ -31,7 +33,7 @@ class UpdateCheckHelper:
                 callback(ApiResponse(' > Error: Response 200 without json'), response.status_code)
                 return None
         else:
-            if response.status_code == '204':
+            if response.status_code == 204:
                 callback(ApiResponse('No update available', response.status_code))
             else:
                 callback(ApiResponse('Error', response.status_code))
@@ -40,14 +42,16 @@ class UpdateCheckHelper:
     def get_update(self):
         return self._update
 
-    def build_request(self, request):
-
+    def build_request(self, update_detail_request):
+        """
+        :type update_detail_request: UpdateDetailRequest
+        """
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
 
         check_update_data = {
-            'unitId': request.unitId,
-            'versionId': request.versionId,
-            'customClientData': request.customClientData
+            'unitId': update_detail_request.unitId,
+            'versionId': update_detail_request.versionId,
+            'customClientData': update_detail_request.customClientData
         }
 
         req = requests.Request(method='POST', url=self._baseUrl, headers=headers, data=json.dumps(check_update_data))
