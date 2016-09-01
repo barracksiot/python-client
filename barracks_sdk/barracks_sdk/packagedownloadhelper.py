@@ -5,10 +5,6 @@ import requests
 from apiresponse import ApiResponse
 
 
-def check_md5(file_path, md5):
-    return md5 == hashlib.md5(open(file_path, 'rb').read()).hexdigest()
-
-
 class PackageDownloadHelper:
     _apiKey = None
     CHUNK_SIZE = 1024
@@ -22,20 +18,18 @@ class PackageDownloadHelper:
         :type temporary_path: string
         :type update_detail: UpdateDetail
         """
-        temporary_path = "/tmp/update.tmp" if temporary_path is None or temporary_path == "" else temporary_path
+        temporary_path = '/tmp/update.tmp' if temporary_path is None or temporary_path == '' else temporary_path
 
         # Download the file
         url = update_detail.get_package_info().get_url()
-        file = self.download_file(url, temporary_path)
-        full_path = os.path.realpath(file)
+        downloaded_file = self.download_file(url, temporary_path)
+        full_path = os.path.realpath(downloaded_file)
 
-        if check_md5(full_path, update_detail.get_package_info().get_md5()):
-            callback(file)
-            return True
-        else:
-            error = ApiResponse('MD5 does not match')
-            callback(error)
-            return error
+        # Check integrity of the downloaded file
+        callback_arg = self.check_file_integrity(full_path, update_detail.get_package_info().get_md5())
+
+        callback(callback_arg)
+        return callback_arg
 
     def download_file(self, url, tmp_path):
 
@@ -55,8 +49,23 @@ class PackageDownloadHelper:
         """
         :type url: string
         """
-
         headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
         req = requests.Request(method='GET', url=url, headers=headers)
 
         return req.prepare()
+
+
+    @staticmethod
+    def check_file_integrity(file_path, md5):
+        """
+        :type file_path: string
+        :type md5: string
+        """
+        integrity = md5 == hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+
+        if integrity:
+            return file_path
+        else:
+            os.remove(file_path)
+            error = ApiResponse('MD5 does not match - file removed at %s' % file_path)
+            return error

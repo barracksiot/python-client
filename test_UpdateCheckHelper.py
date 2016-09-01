@@ -1,10 +1,11 @@
 import json
+import hashlib
+import os
 
 import pytest
 from mock import MagicMock
 
 from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiResponse
-
 
 @pytest.fixture()
 def init_helpers_and_mocks():
@@ -100,10 +101,11 @@ def test_download_package_properly_calls_callback_with_good_params(init_helpers_
     update_fake = init_helpers_and_mocks[2]
 
     ph = PackageDownloadHelper(bh.get_api_key())
-    result = ph.download_package("./anyfile", update_fake, callback_fake)
+    result = ph.download_package('./anyfile', update_fake, callback_fake)
 
-    callback_fake.assert_called_with("./anyfile")
-    assert result == True
+    real_file_path = os.path.realpath('./anyfile')
+    callback_fake.assert_called_with(real_file_path)
+    assert result == real_file_path
 
 
 def test_download_package_properly_calls_callback_with_error(init_helpers_and_mocks):
@@ -115,9 +117,10 @@ def test_download_package_properly_calls_callback_with_error(init_helpers_and_mo
     update_fake = init_helpers_and_mocks[2]
 
     ph = PackageDownloadHelper(bh.get_api_key())
-    obj = ph.download_package("./anyfile", update_fake, callback_fake)
+    obj = ph.download_package('./anyfile', update_fake, callback_fake)
 
-    callback_fake.assert_called_with("./anyfile")
+    real_file_path = os.path.realpath('./anyfile')
+    callback_fake.assert_called_with(real_file_path)
 
 
 def test_init_barracks_helper_without_good_arguments():
@@ -143,10 +146,40 @@ def test_download_fail_without_temporary_path(init_helpers_and_mocks):
 
     result = ph.download_package('', update_fake, callback_fake)
 
-    callback_fake.assert_called_with('/tmp/update.tmp')
-    assert result == True
+    real_file_path = os.path.realpath('/tmp/update.tmp')
+
+    callback_fake.assert_called_with(real_file_path)
+    assert result == real_file_path
 
     result2 = ph.download_package(None, update_fake, callback_fake)
+    callback_fake.assert_called_with(real_file_path)
+    assert result2 == real_file_path
 
-    callback_fake.assert_called_with('/tmp/update.tmp')
-    assert result2 == True
+
+def test_file_integrity_remove_file_in_case_of_fail():
+
+    test_file = open('./testfile.tmp', 'a')
+    test_file.close()
+    test_file_path = os.path.realpath('./testfile.tmp')
+    test_file_md5 = hashlib.md5(open(test_file_path, 'rb').read()).hexdigest()
+
+    bad_md5 = 'some_noise_%s' % test_file_md5
+
+    PackageDownloadHelper.check_file_integrity(test_file_path, bad_md5)
+
+    assert os.path.isfile(test_file_path) == False
+
+
+def test_file_integrity_return_error_in_case_of_bad_md5():
+
+    test_file = open('./testfile.tmp', 'a')
+    test_file.close()
+
+    test_file_path = os.path.realpath('./testfile.tmp')
+    test_file_md5 = hashlib.md5(open(test_file_path, 'rb').read()).hexdigest()
+
+    bad_md5 = 'some_noise_%s' % test_file_md5
+
+    result = PackageDownloadHelper.check_file_integrity(test_file_path, bad_md5)
+
+    assert isinstance(result, ApiResponse) == True
