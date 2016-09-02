@@ -15,7 +15,7 @@ def init_helpers_and_mocks():
     callback_fake = MagicMock()
     bh = BarracksHelper("eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567df2654984fffef2a67be",
                          "https://barracks.ddns.net/")
-    upd_response = '{"packageInfo": {"size": 1925, "md5": "21fd9b37d2b458b42dc2e450699075ef", "url": "https://barracks.ddns.net/api/device/update/download/b640d7f2-31fd-4502-a8e1-bcf7df343f92"}, "properties": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
+    upd_response = '{"packageInfo": {"size": 1925, "md5": "21fd9b37d2b458b42dc2e450699075ef", "url": "https://barracks.ddns.net/api/device/update/download/b640d7f2-31fd-4502-a8e1-bcf7df343f92"}, "customUpdateData": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
     update_fake = UpdateDetail(json.loads(upd_response))
 
     return callback_fake, bh, update_fake
