@@ -125,7 +125,7 @@ def test_download_package_properly_calls_callback_with_error(init_helpers_and_mo
 
 def test_init_barracks_helper_without_good_arguments():
     """
-        Tests that the barracks helper canot be build without API_Key = None
+    Tests that the barracks helper canot be build without API_Key = None
     """
     try:
         BarracksHelper(None,"http://app.barracks.io")
@@ -157,7 +157,9 @@ def test_download_fail_without_temporary_path(init_helpers_and_mocks):
 
 
 def test_file_integrity_remove_file_in_case_of_fail():
-
+    """
+    Tests that downloaded the file is removed when the md5 not match
+    """
     test_file = open('./testfile.tmp', 'a')
     test_file.close()
     test_file_path = os.path.realpath('./testfile.tmp')
@@ -171,7 +173,9 @@ def test_file_integrity_remove_file_in_case_of_fail():
 
 
 def test_file_integrity_return_error_in_case_of_bad_md5():
-
+    """
+    Tests that error is return if md5 not match
+    """
     test_file = open('./testfile.tmp', 'a')
     test_file.close()
 
