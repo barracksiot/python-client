@@ -50,9 +50,11 @@ class UpdateCheckHelper:
 
         check_update_data = {
             'unitId': update_detail_request.unitId,
-            'versionId': update_detail_request.versionId,
-            'customClientData': update_detail_request.customClientData
+            'versionId': update_detail_request.versionId
         }
+
+        if update_detail_request.customClientData is not None:
+            check_update_data['customClientData'] = update_detail_request.customClientData
 
         req = requests.Request(method='POST', url=self._baseUrl, headers=headers, data=json.dumps(check_update_data))
 
