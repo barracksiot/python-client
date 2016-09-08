@@ -5,7 +5,7 @@ import os
 from mock import MagicMock
 import requests_mock
 
-from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiResponse
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, UpdateCheckHelper, BarracksHelper, ApiResponse
 
 _base_url = 'https://app.barracks.io/'
 _check_update_endpoint = '/api/device/update/check'
@@ -38,9 +38,18 @@ def test_init_barracks_helper_succeed_when_api_key_given():
     Tests that the barracks helper is correctly built with an api_key and no base_url
     """
     api_key = 'some_api_key'
+    update_helper_base_url = BarracksHelper.DEFAULT_BASE_URL + UpdateCheckHelper.CHECK_UPDATE_ENDPOINT
+
     helper = BarracksHelper(api_key)
     assert helper.get_api_key() == api_key
     assert helper.get_base_url() == BarracksHelper.DEFAULT_BASE_URL
+
+    assert helper.update_checker_helper
+    assert helper.update_checker_helper._apiKey == api_key
+    assert helper.update_checker_helper._baseUrl == update_helper_base_url
+
+    assert helper.package_download_helper
+    assert helper.package_download_helper._apiKey == api_key
 
 
 def test_init_barracks_helper_succeed_when_api_key_and_base_url_given():
@@ -49,9 +58,18 @@ def test_init_barracks_helper_succeed_when_api_key_and_base_url_given():
     """
     api_key = 'some_api_key'
     base_url = 'http://some.url'
+    update_helper_base_url = base_url + UpdateCheckHelper.CHECK_UPDATE_ENDPOINT
+
     helper = BarracksHelper(api_key, base_url)
     assert helper.get_api_key() == api_key
     assert helper.get_base_url() == base_url
+
+    assert helper.update_checker_helper
+    assert helper.update_checker_helper._apiKey == api_key
+    assert helper.update_checker_helper._baseUrl == update_helper_base_url
+
+    assert helper.package_download_helper
+    assert helper.package_download_helper._apiKey == api_key
 
 
 def test_check_update_properly_build_request_when_no_custom_data_given():
