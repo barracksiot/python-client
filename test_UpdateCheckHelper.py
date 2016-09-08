@@ -22,12 +22,12 @@ def no_update_available_callback(result):
     assert result.get_error_code() is 204
 
 
-def test_init_barracks_helper_fail_when_invalid_arguments_given():
+def test_init_barracks_helper_fail_when_no_api_key_given():
     """
     Tests that the barracks helper cannot be built without api_key argument
     """
     try:
-        BarracksHelper(None, 'http://app.barracks.io')
+        BarracksHelper(None, _base_url)
         assert False
     except ValueError:
         assert True
