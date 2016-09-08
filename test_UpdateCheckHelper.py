@@ -59,12 +59,12 @@ def test_check_update_properly_build_request_when_no_custom_data_given():
     Tests that the request is build and send with appropriate parameters and headers
     """
     request = UpdateDetailRequest('v1', 'MyDevice', None)
-    update_helper = _helper.updateCheckerHelper
+    update_helper = _helper.update_checker_helper
     built_request = update_helper.build_request(request)
     body = json.loads(built_request.body)
 
-    assert body['unitId'] == request.unitId
-    assert body['versionId'] == request.versionId
+    assert body['unitId'] == request.unit_id
+    assert body['versionId'] == request.version_id
     assert 'customClientData' not in body
 
     headers = built_request.headers
@@ -77,13 +77,13 @@ def test_check_update_properly_build_request_when_custom_data_given():
     Tests that the request is build and send with appropriate parameters and headers
     """
     request = UpdateDetailRequest('v1', 'MyDevice', '{"AnyCustomData":"any_value"}')
-    update_helper = _helper.updateCheckerHelper
+    update_helper = _helper.update_checker_helper
     built_request = update_helper.build_request(request)
     body = json.loads(built_request.body)
 
-    assert body['unitId'] == request.unitId
-    assert body['versionId'] == request.versionId
-    assert body['customClientData'] == request.customClientData
+    assert body['unitId'] == request.unit_id
+    assert body['versionId'] == request.version_id
+    assert body['customClientData'] == request.custom_client_data
 
     headers = built_request.headers
     assert headers['Authorization'] == _helper.get_api_key()
@@ -98,7 +98,7 @@ def test_check_update_calls_callback_when_update_available(mocked_server):
     mocked_server.post(_base_url + _check_update_endpoint, text=_json_update_response, status_code=200)
 
     request = UpdateDetailRequest('v1', 'MyDevice', '{"AnyCustomData":"any_value"}')
-    update_helper = _helper.updateCheckerHelper
+    update_helper = _helper.update_checker_helper
 
     update_helper.check_update(request, update_available_callback)
 
@@ -111,17 +111,16 @@ def test_check_update_calls_callback_when_no_update_available(mocked_server):
     mocked_server.post(_base_url + _check_update_endpoint, text='', status_code=204)
 
     request = UpdateDetailRequest('v1', 'MyDevice', '{"AnyCustomData":"any_value"}')
-    update_helper = _helper.updateCheckerHelper
+    update_helper = _helper.update_checker_helper
 
     update_helper.check_update(request, no_update_available_callback)
-
 
 def test_download_package_properly_build_request_with_good_params():
     """
     Tests that the request is build and send with appropriate parameters and headers
     """
     update_detail = UpdateDetail(json.loads(_json_update_response))
-    helper = _helper.packageDownloadHelper
+    helper = _helper.package_download_helper
     built_request = helper.build_download_request(update_detail.get_package_info().get_url())
 
     headers = built_request.headers

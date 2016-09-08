@@ -9,8 +9,8 @@ class BarracksHelper:
     _apiKey = None
     _baseUrl = None
 
-    packageDownloadHelper = None
-    updateCheckerHelper = None
+    package_download_helper = None
+    update_checker_helper = None
 
     def __init__(self, api_key, base_url=None):
         """
@@ -24,8 +24,8 @@ class BarracksHelper:
         self._apiKey = api_key
         self._baseUrl = base_url if base_url is not None else self.DEFAULT_BASE_URL
 
-        self.packageDownloadHelper = PackageDownloadHelper(api_key)
-        self.updateCheckerHelper = UpdateCheckHelper(api_key, self._baseUrl)
+        self.package_download_helper = PackageDownloadHelper(api_key)
+        self.update_checker_helper = UpdateCheckHelper(api_key, self._baseUrl)
 
     def get_api_key(self):
         return self._apiKey
