@@ -3,6 +3,9 @@ from updatecheckhelper import UpdateCheckHelper
 
 
 class BarracksHelper:
+
+    DEFAULT_BASE_URL = 'https://app.barracks.io/'
+
     _apiKey = None
     _baseUrl = None
 
@@ -19,7 +22,7 @@ class BarracksHelper:
             raise ValueError("Field api_key is required")
 
         self._apiKey = api_key
-        self._baseUrl = base_url if base_url is not None else 'https://app.barracks.io/'
+        self._baseUrl = base_url if base_url is not None else self.DEFAULT_BASE_URL
 
         self.packageDownloadHelper = PackageDownloadHelper(api_key)
         self.updateCheckerHelper = UpdateCheckHelper(api_key, self._baseUrl)
