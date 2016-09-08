@@ -22,6 +22,38 @@ def no_update_available_callback(result):
     assert result.get_error_code() is 204
 
 
+def test_init_barracks_helper_fail_when_invalid_arguments_given():
+    """
+    Tests that the barracks helper cannot be built without api_key argument
+    """
+    try:
+        BarracksHelper(None, 'http://app.barracks.io')
+        assert False
+    except ValueError:
+        assert True
+
+
+def test_init_barracks_helper_succeed_when_api_key_given():
+    """
+    Tests that the barracks helper is correctly built with an api_key and no base_url
+    """
+    api_key = 'some_api_key'
+    helper = BarracksHelper(api_key)
+    assert helper.get_api_key() == api_key
+    assert helper.get_base_url() == BarracksHelper.DEFAULT_BASE_URL
+
+
+def test_init_barracks_helper_succeed_when_api_key_and_base_url_given():
+    """
+    Tests that the barracks helper is correctly built with an api_key and no base_url
+    """
+    api_key = 'some_api_key'
+    base_url = 'http://some.url'
+    helper = BarracksHelper(api_key, base_url)
+    assert helper.get_api_key() == api_key
+    assert helper.get_base_url() == base_url
+
+
 def test_check_update_properly_build_request_when_no_custom_data_given():
     """
     Tests that the request is build and send with appropriate parameters and headers
@@ -146,17 +178,6 @@ def test_download_package_properly_calls_callback_with_error():
 
     real_file_path = os.path.realpath('./anyfile')
     callback_fake.assert_called_with(real_file_path)
-
-
-def test_init_barracks_helper_without_good_arguments():
-    """
-    Tests that the barracks helper canot be build without API_Key = None
-    """
-    try:
-        BarracksHelper(None, "http://app.barracks.io")
-        assert False
-    except ValueError:
-        assert True
 
 
 def test_download_fail_without_temporary_path():
