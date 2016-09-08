@@ -5,13 +5,16 @@ from updatedetail import UpdateDetail
 
 
 class UpdateCheckHelper:
+
+    CHECK_UPDATE_ENDPOINT = '/api/device/update/check'
+
     _apiKey = None
     _baseUrl = None
     _update = None
 
     def __init__(self, api_key, base_url):
         self._apiKey = api_key
-        self._baseUrl = base_url + '/api/device/update/check'
+        self._baseUrl = base_url + self.CHECK_UPDATE_ENDPOINT
 
     def check_update(self, update_detail_request, callback):
         """
@@ -46,7 +49,10 @@ class UpdateCheckHelper:
         """
         :type update_detail_request: UpdateDetailRequest
         """
-        headers = {'Authorization': self._apiKey, 'Content-Type': 'application/json'}
+        headers = {
+            'Authorization': self._apiKey,
+            'Content-Type': 'application/json'
+        }
 
         check_update_data = {
             'unitId': update_detail_request.unitId,
