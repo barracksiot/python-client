@@ -179,4 +179,77 @@ def test_file_integrity_return_error_in_case_of_bad_md5():
     result = PackageDownloadHelper.check_file_integrity(test_file_path, bad_md5)
 
     assert isinstance(result, ApiResponse)
+'''
 
+def test_download_package_helper_properly_calls_callback():
+    """
+    Tests that the client ''download'' callback is called whatever comes from Barracks API
+    """
+    update = UpdateDetail(json.loads(_json_update_response))
+
+    download_helper = PackageDownloadHelper(_api_key)
+    download_helper.download_package("./anyfile", update, download_successful_callback)
+
+
+@requests_mock.mock()
+def test_download_package_helper_properly_calls_callback_with_good_params(mocked_server):
+    """
+    Tests that the client ''download'' callback is called with appropriate parameters when success
+    """
+    final_path = './myfile'
+    test_file_path = './anyfile'
+    test_file_content = 'Plop'
+    test_file = open(test_file_path, 'a')
+    test_file.write(test_file_content)
+    test_file.close()
+    callback = MagicMock()
+    update_fake = UpdateDetail(json.loads(_json_update_response))
+
+    with open(test_file_path, 'r') as test_file:
+
+        mocked_server.get(update_fake.get_package_info().get_url(), content=test_file.read(), status_code=200)
+
+        download_helper = PackageDownloadHelper(_helper.get_api_key())
+        result = download_helper.download_package(final_path, update_fake, callback)
+
+        real_file_path = os.path.realpath(final_path)
+        callback.assert_called_with(real_file_path)
+
+        assert result == real_file_path
+
+
+def test_download_package_properly_calls_callback_with_error():
+    """
+    Tests that the client ''download'' callback is called with error object when fail
+    """
+    callback_fake = MagicMock()
+    update_fake = UpdateDetail(json.loads(_json_update_response))
+
+    ph = PackageDownloadHelper(_helper.get_api_key())
+    obj = ph.download_package('./anyfile', update_fake, callback_fake)
+
+    real_file_path = os.path.realpath('./anyfile')
+    callback_fake.assert_called_with(real_file_path)
+
+
+def test_download_fail_without_temporary_path():
+    """
+    Tests that the client ''download'' callback is called with appropriate parameters when success
+    """
+    callback_fake = MagicMock()
+    update_fake = UpdateDetail(json.loads(_json_update_response))
+
+    ph = PackageDownloadHelper(_helper.get_api_key())
+
+    result = ph.download_package('', update_fake, callback_fake)
+
+    real_file_path = os.path.realpath('/tmp/update.tmp')
+
+    callback_fake.assert_called_with(real_file_path)
+    assert result == real_file_path
+
+    result2 = ph.download_package(None, update_fake, callback_fake)
+    callback_fake.assert_called_with(real_file_path)
+    assert result2 == real_file_path
+
+'''
