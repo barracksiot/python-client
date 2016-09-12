@@ -46,7 +46,7 @@ class Client:
         # Perform a simple check
         request = UpdateDetailRequest('Python SDK %s' % barracks_sdk.__version__, 'A device example',
                                         '{"AnyCustomData":"any_value"}')
-        ch = self._bh.updateCheckerHelper
+        ch = self._bh.update_checker_helper
         ch.check_update(request, self.check_update_callback)
 
     def check_update_callback(self, *args):
