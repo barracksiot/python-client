@@ -10,7 +10,7 @@ class UpdateDetail:
         if json is not None:
             self._version_id = json['versionId']
             self._package_info = PackageInfo(json['packageInfo'])
-            self._custom_update_data = json['customUpdateData']
+            self._custom_update_data = json['customUpdateData'] if 'customUpdateData' in json else None
 
     def get_package_info(self):
         return self._package_info
