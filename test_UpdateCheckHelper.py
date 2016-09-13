@@ -2,15 +2,17 @@ import json
 import hashlib
 import os
 
-from mock import MagicMock
 import requests_mock
 
-from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, UpdateCheckHelper, BarracksHelper, ApiResponse
+from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, UpdateCheckHelper, BarracksHelper, \
+    ApiResponse
 
 _base_url = 'https://app.barracks.io/'
 _check_update_endpoint = '/api/device/update/check'
 _update_response_url = 'https://app.barracks.io/api/device/update/download/b640d7f2-31fd-4502-a8e1-bcf7df343f92'
-_json_update_response = '{"packageInfo": {"size": 1925, "md5": "21fd9b37d2b458b42dc2e450699075ef", "url": "' + _update_response_url + '"}, "customUpdateData": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
+_json_update_response = '{"packageInfo": {"size": 1925, "md5": "21fd9b37d2b458b42dc2e450699075ef", "url": "' + \
+                        _update_response_url + \
+                        '"}, "customUpdateData": {"config": "QWERTYkeyboard"}, "versionId": "ft"}'
 _api_key = 'eafeabd7a13bacf44a8122ed4f7093c5c7b356a4f567df2654984fffef2a67be'
 _helper = BarracksHelper(_api_key, _base_url)
 
@@ -109,30 +111,30 @@ def test_check_update_properly_build_request_when_custom_data_given():
     assert headers['Content-Type'] == 'application/json'
 
 
-@requests_mock.mock()
-def test_check_update_calls_callback_when_update_available(mocked_server):
+def test_check_update_calls_callback_when_update_available():
     """
     Tests that the client ''check'' callback is called with UpdateDetail when status code is available
     """
-    mocked_server.post(_base_url + _check_update_endpoint, text=_json_update_response, status_code=200)
+    with requests_mock.mock() as mocked_server:
+        mocked_server.post(_base_url + _check_update_endpoint, text=_json_update_response, status_code=200)
 
-    request = UpdateDetailRequest('v1', 'MyDevice', '{"AnyCustomData":"any_value"}')
-    update_helper = UpdateCheckHelper(_api_key, _base_url)
+        request = UpdateDetailRequest('v1', 'MyDevice', '{"AnyCustomData":"any_value"}')
+        update_helper = UpdateCheckHelper(_api_key, _base_url)
 
-    update_helper.check_update(request, update_available_callback)
+        update_helper.check_update(request, update_available_callback)
 
 
-@requests_mock.mock()
-def test_check_update_calls_callback_when_no_update_available(mocked_server):
+def test_check_update_calls_callback_when_no_update_available():
     """
     Tests that the client ''check'' callback is called with ApiResponse when status code is not available
     """
-    mocked_server.post(_base_url + _check_update_endpoint, text='', status_code=204)
+    with requests_mock.mock() as mocked_server:
+        mocked_server.post(_base_url + _check_update_endpoint, text='', status_code=204)
 
-    request = UpdateDetailRequest('v1', 'MyDevice', '{"AnyCustomData":"any_value"}')
-    update_helper = UpdateCheckHelper(_api_key, _base_url)
+        request = UpdateDetailRequest('v1', 'MyDevice', '{"AnyCustomData":"any_value"}')
+        update_helper = UpdateCheckHelper(_api_key, _base_url)
 
-    update_helper.check_update(request, no_update_available_callback)
+        update_helper.check_update(request, no_update_available_callback)
 
 
 def test_download_package_helper_properly_build_request_when_valid_url_given():
@@ -179,77 +181,3 @@ def test_file_integrity_return_error_in_case_of_bad_md5():
     result = PackageDownloadHelper.check_file_integrity(test_file_path, bad_md5)
 
     assert isinstance(result, ApiResponse)
-'''
-
-def test_download_package_helper_properly_calls_callback():
-    """
-    Tests that the client ''download'' callback is called whatever comes from Barracks API
-    """
-    update = UpdateDetail(json.loads(_json_update_response))
-
-    download_helper = PackageDownloadHelper(_api_key)
-    download_helper.download_package("./anyfile", update, download_successful_callback)
-
-
-@requests_mock.mock()
-def test_download_package_helper_properly_calls_callback_with_good_params(mocked_server):
-    """
-    Tests that the client ''download'' callback is called with appropriate parameters when success
-    """
-    final_path = './myfile'
-    test_file_path = './anyfile'
-    test_file_content = 'Plop'
-    test_file = open(test_file_path, 'a')
-    test_file.write(test_file_content)
-    test_file.close()
-    callback = MagicMock()
-    update_fake = UpdateDetail(json.loads(_json_update_response))
-
-    with open(test_file_path, 'r') as test_file:
-
-        mocked_server.get(update_fake.get_package_info().get_url(), content=test_file.read(), status_code=200)
-
-        download_helper = PackageDownloadHelper(_helper.get_api_key())
-        result = download_helper.download_package(final_path, update_fake, callback)
-
-        real_file_path = os.path.realpath(final_path)
-        callback.assert_called_with(real_file_path)
-
-        assert result == real_file_path
-
-
-def test_download_package_properly_calls_callback_with_error():
-    """
-    Tests that the client ''download'' callback is called with error object when fail
-    """
-    callback_fake = MagicMock()
-    update_fake = UpdateDetail(json.loads(_json_update_response))
-
-    ph = PackageDownloadHelper(_helper.get_api_key())
-    obj = ph.download_package('./anyfile', update_fake, callback_fake)
-
-    real_file_path = os.path.realpath('./anyfile')
-    callback_fake.assert_called_with(real_file_path)
-
-
-def test_download_fail_without_temporary_path():
-    """
-    Tests that the client ''download'' callback is called with appropriate parameters when success
-    """
-    callback_fake = MagicMock()
-    update_fake = UpdateDetail(json.loads(_json_update_response))
-
-    ph = PackageDownloadHelper(_helper.get_api_key())
-
-    result = ph.download_package('', update_fake, callback_fake)
-
-    real_file_path = os.path.realpath('/tmp/update.tmp')
-
-    callback_fake.assert_called_with(real_file_path)
-    assert result == real_file_path
-
-    result2 = ph.download_package(None, update_fake, callback_fake)
-    callback_fake.assert_called_with(real_file_path)
-    assert result2 == real_file_path
-
-'''
