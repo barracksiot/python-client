@@ -21,7 +21,7 @@ class PackageDownloadHelper:
         :type temporary_path: string
         :type update_detail: UpdateDetail
         """
-        temporary_path = self.DEFAULT_TEMPORARY_PATH if temporary_path else temporary_path
+        temporary_path = self.DEFAULT_TEMPORARY_PATH if temporary_path is None else temporary_path
 
         # Download the file
         url = update_detail.get_package_info().get_url()
