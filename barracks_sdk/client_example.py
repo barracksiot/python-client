@@ -12,7 +12,8 @@ def main():
         description='This will make a request to Barracks to check if an update is available. If yes, it will be downloaded.')
     group = parser.add_argument_group('authentication')
     group.add_argument('-a', '--api_key', help='Your Barracks API key')
-    parser.add_argument('-d', '--destination', help='Destination for the downloaded package. Default: ./', default='./update_package')
+    parser.add_argument('-d', '--destination', help='Destination for the downloaded package. Default: ./',
+                        default='./update_package')
     parser.add_argument('-u', '--base_url', help='Alternative URL for Barracks API. Default: http://app.barracks.io')
 
     args = parser.parse_args()
@@ -22,7 +23,7 @@ def main():
     destination = args.destination
 
     if api_key is None:
-        print('client_example.py -a <your_api_key> -u <optionnal_alternative_base_url>')
+        print('client_example.py -a <your_api_key> -u <optional_alternative_base_url>')
         sys.exit(2)
     else:
         # Let's initialise the SDK with the API key and the base URL
@@ -43,10 +44,13 @@ class Client:
         self._bh = BarracksHelper(api_key, base_url)
 
     def check_for_updates(self):
+        # build customClientData
+        custom_client_data = {'AnyCustomData': 'any_value'}
+
         # Perform a simple check
         request = UpdateDetailRequest('Python SDK %s' % barracks_sdk.__version__, 'A device example',
-                                        '{"AnyCustomData":"any_value"}')
-        ch = self._bh.updateCheckerHelper
+                                      custom_client_data)
+        ch = self._bh.update_checker_helper
         ch.check_update(request, self.check_update_callback)
 
     def check_update_callback(self, *args):
@@ -61,11 +65,12 @@ class Client:
                 ph = PackageDownloadHelper(self._api_key)
                 ph.download_package(self._destination, update, self.download_package_callback)
                 print('%s (%s bytes) has been downloaded in %s - checksum: %s'
-                      % (update.get_version_id(), update.get_package_info().get_size(), self._destination, update.get_package_info().get_md5()))
+                      % (update.get_version_id(), update.get_package_info().get_size(), self._destination,
+                         update.get_package_info().get_md5()))
 
             # args[0] is an ApiError
             elif isinstance(args[0], ApiResponse):
-                print('Message : ' + args[0].get_message())
+                print('Message : {0} ({1})'.format(args[0].get_message(), args[0].get_error_code()))
 
             else:
                 print(args[0].__str__())
