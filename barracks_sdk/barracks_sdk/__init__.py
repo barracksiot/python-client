@@ -5,7 +5,7 @@
     This module provides the Barracks API implementation
 """
 
-from apiresponse import ApiResponse
+from apierror import ApiError
 from barrackshelper import BarracksHelper
 from packagedownloadhelper import PackageDownloadHelper
 from packageinfo import PackageInfo
@@ -13,8 +13,8 @@ from updatecheckhelper import UpdateCheckHelper
 from updatedetail import UpdateDetail
 from updatedetailrequest import UpdateDetailRequest
 
-__all__ = ['UpdateDetail', 'UpdateDetailRequest', 'PackageDownloadHelper', 'BarracksHelper', 'ApiResponse',
-           'PackageInfo',
-           'UpdateCheckHelper']
+__all__ = ["UpdateDetail", "UpdateDetailRequest", "PackageDownloadHelper", "BarracksHelper", "ApiError",
+           "PackageInfo",
+           "UpdateCheckHelper"]
 
-__version__ = '0.0.6'
+__version__ = "0.0.7"
