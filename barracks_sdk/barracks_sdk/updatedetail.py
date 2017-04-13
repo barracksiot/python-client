@@ -1,4 +1,4 @@
-from packageinfo import PackageInfo
+from .packageinfo import PackageInfo
 
 
 class UpdateDetail:

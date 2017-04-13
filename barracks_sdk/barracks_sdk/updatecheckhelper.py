@@ -1,7 +1,7 @@
 import json
 import requests
-from apiresponse import ApiResponse
-from updatedetail import UpdateDetail
+from .apiresponse import ApiResponse
+from .updatedetail import UpdateDetail
 
 
 class UpdateCheckHelper:
@@ -24,7 +24,7 @@ class UpdateCheckHelper:
         prepared_request = self.build_request(update_detail_request)
 
         # Accept certificate even if another domain than the Barracks one is used
-        response = requests.session().send(prepared_request, verify=False)
+        response = requests.session().send(prepared_request)
 
         if response.status_code == 200:
             if response.json is not None:

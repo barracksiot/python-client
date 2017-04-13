@@ -1,5 +1,5 @@
-from packagedownloadhelper import PackageDownloadHelper
-from updatecheckhelper import UpdateCheckHelper
+from .packagedownloadhelper import PackageDownloadHelper
+from .updatecheckhelper import UpdateCheckHelper
 
 
 class BarracksHelper:

@@ -2,7 +2,7 @@ import hashlib
 import os
 import sys
 import requests
-from apiresponse import ApiResponse
+from .apiresponse import ApiResponse
 
 
 class PackageDownloadHelper:

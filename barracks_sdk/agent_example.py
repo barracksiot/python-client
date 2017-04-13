@@ -1,44 +1,35 @@
-import argparse
 import os
-import sys
-
-
+import sched
 import barracks_sdk
+import time
 
 from barracks_sdk import UpdateDetail, UpdateDetailRequest, PackageDownloadHelper, BarracksHelper, ApiResponse
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='This will make a request to Barracks to check if an update is available. If yes, it will be downloaded.')
-    group = parser.add_argument_group('authentication')
-    group.add_argument('-a', '--api_key', help='Your Barracks API key')
-    parser.add_argument('-d', '--destination', help='Destination for the downloaded package. Default: ./',
-                        default='./update_package')
-    parser.add_argument('-u', '--base_url', help='Alternative URL for Barracks API. Default: http://app.barracks.io')
+    api_key = 'aa89ca0d239a2f54bce88cfa7defe3e9363a6ff181d0395eacbf9e4197420356'
+    period = 25
 
-    args = parser.parse_args()
+    client = Client(api_key)
+    client.check_for_updates()
+    s.enter(period, 1, check_for_update, (client, period,))
+    s.run()
 
-    api_key = args.api_key
-    base_url = args.base_url
-    destination = args.destination
 
-    if api_key is None:
-        print('client_example.py -a <your_api_key> -u <optional_alternative_base_url>')
-        sys.exit(2)
-    else:
-        # Let's initialise the SDK with the API key and the base URL
-        client = Client(api_key, base_url, destination)
-        client.check_for_updates()
+def check_for_update(client, period):
+    print("Doing stuff...")
+    # do your stuff
+    client.check_for_updates()
+    s.enter(period, 1, check_for_update, (client, period,))
 
 
 class Client:
     _api_key = None
-    _base_url = 'https://app.barracks.io/'
-    _destination = './update_package'
+    _base_url = None
+    _destination = None
     _bh = None
 
-    def __init__(self, api_key, base_url, destination):
+    def __init__(self, api_key, base_url='https://app.barracks.io/', destination='./update_package'):
         self._api_key = api_key
         self._base_url = base_url
         self._destination = destination
@@ -95,4 +86,5 @@ class Client:
 
 
 if __name__ == '__main__':
+    s = sched.scheduler(time.time, time.sleep)
     main()
