@@ -16,5 +16,3 @@ from updatedetailrequest import UpdateDetailRequest
 __all__ = ["UpdateDetail", "UpdateDetailRequest", "PackageDownloadHelper", "BarracksHelper", "ApiResponse",
            "PackageInfo",
            "UpdateCheckHelper"]
-
-__version__ = "0.0.7"
