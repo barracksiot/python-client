@@ -19,3 +19,4 @@ class DeviceInfo:
   def custom_client_data(self):
     """Get the device's custom client data"""
     return self._custom_client_data;
+    
