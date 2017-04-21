@@ -4,3 +4,4 @@
 .coverage
 *.egg
 *.egg-info
+__pycache__
