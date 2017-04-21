@@ -2,3 +2,5 @@
 .cache
 .idea
 .coverage
+*.egg
+*.egg-info
