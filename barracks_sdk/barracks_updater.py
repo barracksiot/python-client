@@ -37,7 +37,7 @@ class BarracksUpdater:
     """
     payload = {
       'unitId': device_info.unit_id,
-      'components': {}
+      'components': []
     }
 
     if device_info.custom_client_data is not None:
