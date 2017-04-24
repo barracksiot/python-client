@@ -16,7 +16,7 @@ setup(
     long_description=read('README.md'),
     install_requires=read('requirements.txt'),
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'requests_mock'],
+    tests_require=['pytest', 'requests_mock', 'mock'],
     url='https://barracks.io',
     classifiers=[
         'Programming Language :: Python',
