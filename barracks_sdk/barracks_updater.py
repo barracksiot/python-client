@@ -1,5 +1,15 @@
 import requests
+import uuid
+import os
+import md5
+import hashlib
 from device_info import DeviceInfo
+from package import Package
+from downloadable_package import DownloadablePackage
+from package_file import PackageFile
+from request_exception import BarracksRequestException
+from download_exception import BarracksDownloadException
+from checksum_exception import BarracksChecksumException
 from json_serializer import JsonSerializer
 
 class BarracksUpdater:
@@ -7,7 +17,7 @@ class BarracksUpdater:
   DEFAULT_BASE_URL = 'https://app.barracks.io'
   GET_DEVICE_PACKAGES_ENDPOINT = '/api/device/resolve'
 
-  def __init__(self, api_key, base_url=DEFAULT_BASE_URL, allow_self_signed=False):
+  def __init__(self, api_key, base_url = DEFAULT_BASE_URL, allow_self_signed = False):
     self._api_key = api_key
     self._base_url = base_url
     self._allow_self_signed = allow_self_signed
@@ -17,25 +27,68 @@ class BarracksUpdater:
     """
     :type device_info: DeviceInfo
     """
+    print self._base_url + BarracksUpdater.GET_DEVICE_PACKAGES_ENDPOINT
     response = requests.post(
       self._base_url + BarracksUpdater.GET_DEVICE_PACKAGES_ENDPOINT,
-      headers=self._get_headers(),
-      data=self._json_serializer.serialize(device_info),
-      verify=self._allow_self_signed
+      headers = {
+        'Authorization': self._api_key,
+        'Content-type': 'application/json',
+        'Accept': 'application/json'
+      },
+      data = self._json_serializer.serialize(device_info),
+      verify = not self._allow_self_signed
     )
-    return self._handle_response(response.json())
+    if response.status_code == 200:
+      return self._convert_to_packages(response.json())
+    else:
+      raise BarracksRequestException(response.request.body, response.text)
 
-  def _get_headers(self):
+  def _convert_to_packages(self, json_response):
     return {
-      'Authorization': self._api_key,
-      'Content-Type': 'application/json'
+      'availablePackages': list(map(lambda item: self._build_downloadable_package(item), json_response['available'])),
+      'changedPackages': list(map(lambda item: self._build_downloadable_package(item), json_response['changed'])),
+      'unchangedPackages': list(map(lambda item: self._buildPackage(item), json_response['unchanged'])),
+      'unavailableReferences': list(map(lambda item: item['reference'], json_response['unavailable']))
     }
 
-  def _handle_response(self, response):
+  def _build_downloadable_package(self, dictionary):
+    return DownloadablePackage(
+      dictionary['reference'],
+      dictionary['version'],
+      dictionary['url'],
+      dictionary['filename'],
+      dictionary['size'],
+      dictionary['md5'],
+      self.download_package
+    )
+
+  def _buildPackage(self, dictionary):
+    return Package(
+      dictionary['reference'],
+      dictionary['version']
+    )
+
+  def download_package(self, package, destination = None):
+    destination = destination or (str(uuid.uuid1()) + package._filename)
+    response = requests.get(
+      package._url,
+      headers = {
+        'Authorization': self._api_key
+      },
+      verify = not self._allow_self_signed,
+      stream = True
+    )
     if response.status_code == 200:
-      if response.json is not None:
-        print response.json()
+      hash_md5 = hashlib.md5()
+      with open(destination, 'wb') as f:
+        for chunk in response.iter_content(1024):
+          f.write(chunk)
+          hash_md5.update(chunk)
+      if hash_md5.hexdigest() == package._md5:
+        return PackageFile(destination, package)
+      else:
+        os.remove(destination)
+        raise BarracksChecksumException(package)
     else:
-      # TODO build custom exception class
-      raise Exception('Request to get device packages failed')
-      
+      raise BarracksDownloadException(response.request.body, response.text)
+

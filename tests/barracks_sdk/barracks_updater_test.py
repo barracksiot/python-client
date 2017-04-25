@@ -1,8 +1,10 @@
 import unittest
 from mock import patch, Mock
+from package_utils import build_package, build_downloadable_package
+import uuid
 import json
 import requests_mock
-from barracks_sdk import BarracksUpdater, DeviceInfo, JsonSerializer
+from barracks_sdk import BarracksUpdater, DeviceInfo, JsonSerializer, BarracksRequestException, DownloadablePackage, Package
 
 class BarrackUpdaterTest(unittest.TestCase):
 
@@ -40,9 +42,9 @@ class BarrackUpdaterTest(unittest.TestCase):
     self.assertTrue(barracks_updater._allow_self_signed)
 
   @requests_mock.mock()
-  @patch.object(BarracksUpdater, '_handle_response')
+  @patch.object(BarracksUpdater, '_convert_to_packages')
   @patch.object(JsonSerializer, 'serialize')
-  def test__get_device_packages__should__post_device_info(self, requests, json_serializer_mock, handle_response_mock):
+  def test__get_device_packages__should__post_device_info_and_return_packages(self, requests, serialize_mock, convert_to_package_mock):
     # Given
     device_packages = []
     device_info = DeviceInfo(self.unit_id, device_packages)
@@ -52,11 +54,11 @@ class BarrackUpdaterTest(unittest.TestCase):
       'unchanged': [],
       'unavailable': []
     }
-    json_serializer_mock.return_value = '{"aJson":"withValue"}'
-    handle_response_mock.return_value = None
+    serialize_mock.return_value = '{"aJson":"withValue"}'
+    convert_to_package_mock.return_value = { 'availablePackages': list() }
     requests.post(
       self.default_base_url + '/api/device/resolve',
-      additional_matcher=lambda request: json_serializer_mock.return_value in (request.text or ''),
+      additional_matcher=lambda request: serialize_mock.return_value in (request.text or ''),
       json=api_response
     )
 
@@ -65,19 +67,177 @@ class BarrackUpdaterTest(unittest.TestCase):
     result = barracks_updater.get_device_packages(device_info)
 
     # Then
-    handle_response_mock.assert_called_once_with(api_response)
-    json_serializer_mock.assert_called_once_with(device_info)
-    self.assertEquals(result, handle_response_mock.return_value)
+    serialize_mock.assert_called_once_with(device_info)
+    convert_to_package_mock.assert_called_once_with(api_response)
+    self.assertEquals(result, convert_to_package_mock.return_value)
 
+  @requests_mock.mock()
+  @patch.object(BarracksUpdater, '_convert_to_packages')
+  @patch.object(JsonSerializer, 'serialize')
+  def test__get_device_packages__should__raise_an_exception__when__http_request_fails(self, requests, serialize_mock, convert_to_package_mock):
+    # Given
+    device_packages = []
+    device_info = DeviceInfo(self.unit_id, device_packages)
+    serialize_mock.return_value = '{"aJson":"withValue"}'
+    requests.post(
+      self.default_base_url + '/api/device/resolve',
+      additional_matcher=lambda request: serialize_mock.return_value in (request.text or ''),
+      status_code=400
+    )
 
-  # def test__get_headers(self):
-  #   # Given
-  #   barracks_updater = BarracksUpdater(self.api_key)
-  #   expected = {
-  #     'Authorization': api_key,
-  #     'Content-Type': 'application/json'
-  #   }
+    # When / Then
+    barracks_updater = BarracksUpdater(self.api_key)
+    with self.assertRaises(BarracksRequestException):
+      barracks_updater.get_device_packages(device_info)
 
+    serialize_mock.assert_called_once_with(device_info)
+    convert_to_package_mock.assert_not_called
+
+  @patch.object(BarracksUpdater, 'download_package')
+  def test__convert_to_packages__should__transform_available_packages_in_json_response_in_array_of_downloadable_packages(self, download_package_mock):
+    # Given
+    device_packages = []
+    device_info = DeviceInfo(self.unit_id, device_packages)
+    available_package1 = build_downloadable_package(download_package_mock)
+    available_package2 = build_downloadable_package(download_package_mock)
+    json_response = {
+      "available": [
+        {
+          "reference": available_package1.reference,
+          "version": available_package1.version,
+          "url": available_package1.url,
+          "filename": available_package1.filename,
+          "size": available_package1.size,
+          "md5": available_package1.md5
+        },
+        {
+          "reference": available_package2.reference,
+          "version": available_package2.version,
+          "url": available_package2.url,
+          "filename": available_package2.filename,
+          "size": available_package2.size,
+          "md5": available_package2.md5
+        }
+      ],
+      "changed": [],
+      "unchanged": [],
+      "unavailable": []
+    }
+
+    # When
+    barracks_updater = BarracksUpdater(self.api_key)
+    result = barracks_updater._convert_to_packages(json_response)
+
+    # Then
+    self.assertListEqual([ available_package1, available_package2 ], result['availablePackages'])
+    self.assertFalse(result['changedPackages'])
+    self.assertFalse(result['unchangedPackages'])
+    self.assertFalse(result['unavailableReferences'])
+
+  @patch.object(BarracksUpdater, 'download_package')
+  def test__convert_to_packages__should__transform_changed_packages_in_json_response_in_array_of_downloadable_packages(self, download_package_mock):
+    # Given
+    device_packages = []
+    device_info = DeviceInfo(self.unit_id, device_packages)
+    changed_package1 = build_downloadable_package(download_package_mock)
+    changed_package2 = build_downloadable_package(download_package_mock)
+    json_response = {
+      "changed": [
+        {
+          "reference": changed_package1.reference,
+          "version": changed_package1.version,
+          "url": changed_package1.url,
+          "filename": changed_package1.filename,
+          "size": changed_package1.size,
+          "md5": changed_package1.md5
+        },
+        {
+          "reference": changed_package2.reference,
+          "version": changed_package2.version,
+          "url": changed_package2.url,
+          "filename": changed_package2.filename,
+          "size": changed_package2.size,
+          "md5": changed_package2.md5
+        }
+      ],
+      "available": [],
+      "unchanged": [],
+      "unavailable": []
+    }
+
+    # When
+    barracks_updater = BarracksUpdater(self.api_key)
+    result = barracks_updater._convert_to_packages(json_response)
+
+    # Then
+    self.assertListEqual([ changed_package1, changed_package2 ], result['changedPackages'])
+    self.assertFalse(result['availablePackages'])
+    self.assertFalse(result['unchangedPackages'])
+    self.assertFalse(result['unavailableReferences'])
+
+  def test__convert_to_packages__should__transform_unchanged_packages_in_json_response_in_array_of_packages(self):
+    # Given
+    device_packages = []
+    device_info = DeviceInfo(self.unit_id, device_packages)
+    unchanged_package1 = build_package()
+    unchanged_package2 = build_package()
+    json_response = {
+      "unchanged": [
+        {
+          "reference": unchanged_package1.reference,
+          "version": unchanged_package1.version
+        },
+        {
+          "reference": unchanged_package2.reference,
+          "version": unchanged_package2.version
+        }
+      ],
+      "available": [],
+      "changed": [],
+      "unavailable": []
+    }
+
+    # When
+    barracks_updater = BarracksUpdater(self.api_key)
+    result = barracks_updater._convert_to_packages(json_response)
+
+    # Then
+    self.assertListEqual([ unchanged_package1, unchanged_package2 ], result['unchangedPackages'])
+    self.assertFalse(result['availablePackages'])
+    self.assertFalse(result['changedPackages'])
+    self.assertFalse(result['unavailableReferences'])
+
+  def test__convert_to_packages__should__transform_unavailable_references_in_json_response_in_array_of_strings(self):
+    # Given
+    device_packages = []
+    device_info = DeviceInfo(self.unit_id, device_packages)
+    unavailable_package1 = str(uuid.uuid1())
+    unavailable_package2 = str(uuid.uuid1())
+    json_response = {
+      "unavailable": [
+        {
+          "reference": unavailable_package1
+        },
+        {
+          "reference": unavailable_package2
+        }
+      ],
+      "available": [],
+      "changed": [],
+      "unchanged": []
+    }
+
+    # When
+    barracks_updater = BarracksUpdater(self.api_key)
+    result = barracks_updater._convert_to_packages(json_response)
+
+    # Then
+    self.assertListEqual([ unavailable_package1, unavailable_package2 ], result['unavailableReferences'])
+    self.assertFalse(result['availablePackages'])
+    self.assertFalse(result['changedPackages'])
+    self.assertFalse(result['unchangedPackages'])
+
+###############
   #   # When
   #   headers = barracks_updater._BarracksUpdater__get_headers()
 

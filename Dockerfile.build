@@ -1,0 +1,9 @@
+FROM        python:2.7
+
+RUN         pip install coverage
+
+WORKDIR     /work
+
+COPY        . /work
+
+CMD         coverage run --include=barracks_sdk/* setup.py test && coverage report

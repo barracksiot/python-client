@@ -2,7 +2,7 @@ import json
 
 class DeviceInfo:
 
-  def __init__(self, unit_id, packages, custom_client_data=None):
-    self.unit_id = unit_id
+  def __init__(self, unit_id, packages, custom_client_data = {}):
+    self.unitId = unit_id
     self.packages = packages
-    self.custom_client_data = custom_client_data
+    self.customClientData = custom_client_data

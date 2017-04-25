@@ -6,3 +6,6 @@
 *.egg-info
 __pycache__
 .eggs
+.DS_Store
+build
+htmlcov

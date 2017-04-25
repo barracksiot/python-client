@@ -9,7 +9,7 @@ class JsonSerializerTest(unittest.TestCase):
     # Given
     json_serializer = JsonSerializer()
     device_info = DeviceInfo('unit_id', [])
-    expected_json = '{"custom_client_data": null, "packages": [], "unit_id": "%s"}' % (device_info.unit_id)
+    expected_json = '{"customClientData": {}, "packages": [], "unitId": "%s"}' % (device_info.unitId)
 
     # When
     result = json_serializer.serialize(device_info)
@@ -22,7 +22,7 @@ class JsonSerializerTest(unittest.TestCase):
     json_serializer = JsonSerializer()
     package = Package('app1', 'v1')
     device_info = DeviceInfo('unit_id', [ package ])
-    expected_json = '{"custom_client_data": null, "packages": [{"reference": "%s", "version": "%s"}], "unit_id": "%s"}' % (package.reference, package.version, device_info.unit_id)
+    expected_json = '{"customClientData": {}, "packages": [{"reference": "%s", "version": "%s"}], "unitId": "%s"}' % (package.reference, package.version, device_info.unitId)
 
     # When
     result = json_serializer.serialize(device_info)
@@ -36,7 +36,7 @@ class JsonSerializerTest(unittest.TestCase):
     package = Package('app1', 'v1')
     custom_client_data = '{"data": "value"}'
     device_info = DeviceInfo('unit_id', [ package ], json.loads(custom_client_data))
-    expected_json = '{"custom_client_data": %s, "packages": [{"reference": "%s", "version": "%s"}], "unit_id": "%s"}' % (custom_client_data, package.reference, package.version, device_info.unit_id)
+    expected_json = '{"customClientData": %s, "packages": [{"reference": "%s", "version": "%s"}], "unitId": "%s"}' % (custom_client_data, package.reference, package.version, device_info.unitId)
 
     # When
     result = json_serializer.serialize(device_info)
