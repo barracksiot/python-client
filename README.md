@@ -5,7 +5,7 @@ The Python SDK to interact with the [Barracks](https://barracks.io/) API
 
 ## Installation
 ```bash
-pip install -e git://git@github.com:barracksiot/python-client.git@v2#egg=barracks_sdk
+pip install -e git://git@github.com:barracksiot/python-client.git@2.0.0#egg=barracks_sdk
 ```
 
 ## Usage
