@@ -1,5 +1,3 @@
-import json
-
 class DeviceInfo:
 
   def __init__(self, unit_id, packages, custom_client_data = {}):

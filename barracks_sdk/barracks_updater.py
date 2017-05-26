@@ -27,7 +27,6 @@ class BarracksUpdater:
     """
     :type device_info: DeviceInfo
     """
-    print self._base_url + BarracksUpdater.GET_DEVICE_PACKAGES_ENDPOINT
     response = requests.post(
       self._base_url + BarracksUpdater.GET_DEVICE_PACKAGES_ENDPOINT,
       headers = {
@@ -39,7 +38,6 @@ class BarracksUpdater:
       verify = not self._allow_self_signed
     )
     if response.status_code == 200:
-      print response.json()
       return self._convert_to_packages(response.json())
     else:
       raise BarracksRequestException(response.request.body, response.text)
