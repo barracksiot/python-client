@@ -1,13 +1,14 @@
-# from barracks_sdk import Package
-
-# reference = 'io.barracks.app';
-# version = '1.2.3';
-
-# def test_package_constructor():
-#   """
-#   Tests that the Package class exposes reference and version property
-#   """
-#   package = Package(reference, version)
-#   assert isinstance(package, Package)
-#   assert package.reference == reference
-#   assert package.version == version
+[
+  {
+    "reference": "greg.pckg.test",
+    "version": "0.2.0"
+  },
+  {
+    "reference": "com.test.1234",
+    "version": "v-1490894199"
+  },
+  {
+    "reference": "ref-package-1490294068",
+    "version": "coucou"
+  }
+]

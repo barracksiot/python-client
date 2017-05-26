@@ -5,7 +5,7 @@ def build_downloadable_package(download_callback):
   return DownloadablePackage(
     str(uuid.uuid1()),
     str(uuid.uuid1()),
-    str(uuid.uuid1()),
+    'https://' + str(uuid.uuid1()),
     str(uuid.uuid1()),
     1337,
     str(uuid.uuid1()),

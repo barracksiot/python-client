@@ -3,27 +3,35 @@ import os
 import sys
 import imp
 
-from barracks_sdk import BarracksUpdater, DeviceInfo, BarracksRequestException, BarracksDownloadException, BarracksChecksumException
+from barracks_sdk import *
 
 def main():
     parser = argparse.ArgumentParser(
         description='This is an implementation example of the BarracksUpdater.'
     )
     group = parser.add_argument_group('authentication')
-    group.add_argument('-a', '--api_key', help='Your Barracks API key')
+    group.add_argument('-u', '--unit_id', help='The unit ID')
+    group.add_argument('-k', '--api_key', help='Your Barracks API key')
     
     args = parser.parse_args()
 
     api_key = args.api_key
+    unit_id = args.unit_id
 
-    if api_key is None:
-        print('client.py -a <your_api_key>')
+    if api_key is None or unit_id is None:
+        print('client.py -u <unit_id> -k <your_api_key>')
         sys.exit(2)
     else:
         # Let's initialise the SDK with the API key and the base URL
         try:
-            updater = BarracksUpdater(api_key, 'https://barracks.ddns.net', True)
-            packages = updater.get_device_packages(DeviceInfo('unitId', []))
+            updater = BarracksUpdater(api_key)
+            packages = updater.get_device_packages(
+                DeviceInfo(
+                    unit_id, 
+                    [ Package('io.barracks.app1', '0.0.1') ],
+                    { "prop1": "Value 1" }
+                )
+            )
             print 'Barracks response: ', packages
             downloadAndInstallPackages(packages['availablePackages'])
             downloadAndInstallPackages(packages['changedPackages'])

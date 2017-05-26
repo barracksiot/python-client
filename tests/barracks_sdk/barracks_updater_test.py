@@ -1,10 +1,11 @@
+from barracks_sdk import *
 import unittest
-from mock import patch, Mock
+from mock import patch, Mock, ANY, MagicMock, mock_open
+import hashlib
 from package_utils import build_package, build_downloadable_package
 import uuid
 import json
 import requests_mock
-from barracks_sdk import BarracksUpdater, DeviceInfo, JsonSerializer, BarracksRequestException, DownloadablePackage, Package
 
 class BarrackUpdaterTest(unittest.TestCase):
 
@@ -13,6 +14,13 @@ class BarrackUpdaterTest(unittest.TestCase):
   api_key = 'qwertyuiop'
   unit_id = 'my_unit'
   json_serializer_mock = Mock()
+  file_content = """
+    GYUGUYFUY67867tGGUYGFYTF676t76gfHGFVYFYTF6768t7TGUGFFYFYr76r7tguyghjgvYRO
+    &^^&gfvugf76tr7GJVGU&&^Tfguvuy76rtuyGVJGU&T&^ghjvuyt76fhvuyF&^TUYGUYT&UGV
+    JVUYFUYVJUF&^fuyfg7fhvFU&^RUYFU&rUG*ugbvjhbvGVUYFG&^76fghjvytfd6E^YTFCVY5
+    HGI&*YIUhbhjg78tgyiugBI*T&giygutyd456eDYFVJKNBJCXsterd6yufygjvhhcytDY&FYt
+    GYUT^&Gjgfty5665rftyvgTSEVTdtryftugjuHGUYTE^dDFYTJHGCVFYJTykugi76UYKFVKYT
+  """
 
   def test__constructor__when__only_api_key(self):
     # When
@@ -58,6 +66,11 @@ class BarrackUpdaterTest(unittest.TestCase):
     convert_to_package_mock.return_value = { 'availablePackages': list() }
     requests.post(
       self.default_base_url + '/api/device/resolve',
+      headers={ 
+        'Authorization': self.api_key, 
+        'Content-type': 'application/json', 
+        'Accept': 'application/json' 
+      },
       additional_matcher=lambda request: serialize_mock.return_value in (request.text or ''),
       json=api_response
     )
@@ -81,6 +94,11 @@ class BarrackUpdaterTest(unittest.TestCase):
     serialize_mock.return_value = '{"aJson":"withValue"}'
     requests.post(
       self.default_base_url + '/api/device/resolve',
+      headers={ 
+        'Authorization': self.api_key, 
+        'Content-type': 'application/json', 
+        'Accept': 'application/json' 
+      },
       additional_matcher=lambda request: serialize_mock.return_value in (request.text or ''),
       status_code=400
     )
@@ -237,30 +255,75 @@ class BarrackUpdaterTest(unittest.TestCase):
     self.assertFalse(result['changedPackages'])
     self.assertFalse(result['unchangedPackages'])
 
-###############
-  #   # When
-  #   headers = barracks_updater._BarracksUpdater__get_headers()
+  @requests_mock.mock()
+  @patch.object(BarracksUpdater, '_create_file_and_verify_checksum')
+  def test__download_package__should__return_PackageFile__when__download_request_and_checksum_are_successful(self, requests, create_file_mock):
+    # Given
+    destination = '/tmp/plop'
+    package = build_downloadable_package(Mock())
+    expectedResult = PackageFile(destination, package)
+    response = requests.get(
+      package._url,
+      status_code=200,
+      headers={ 'Authorization': self.api_key },
+      text=self.file_content
+    )
 
-  #   # Then
-  #   self.assertEquals(headers, expected)
+    # When
+    barracks_updater = BarracksUpdater(self.api_key)
+    result = barracks_updater.download_package(package, destination)
 
-  # def test__build_payload_when_no_package_in_device_info(self):
-  #   # Given
-  #   barracks_updater = BarracksUpdater(api_key)
-  #   device_info = DeviceInfo(unit_id, [])
-  #   expected = {
-  #     'unitId': unit_id,
-  #     'components': []
-  #   }
+    # Then
+    self.assertEquals(result, expectedResult)
+    create_file_mock.assert_called_once_with(ANY, destination, package._md5)
 
-  #   # When
-  #   payload = barracks_updater._BarracksUpdater__build_payload(device_info)
+  @requests_mock.mock()
+  @patch.object(BarracksUpdater, '_create_file_and_verify_checksum')
+  def test__download_package__should__raise_exception__when__http_request_is_not_successful(self, requests, create_file_mock):
+    # Given
+    destination = '/tmp/plop'
+    package = build_downloadable_package(Mock())
+    expectedResult = PackageFile(destination, package)
+    response = requests.get(
+      package._url,
+      status_code=401,
+      headers={ 'Authorization': self.api_key }
+    )
 
-  #   # Then
-  #   self.assertEquals(payload, expected)
+    # When # Then
+    barracks_updater = BarracksUpdater(self.api_key)
+    with self.assertRaises(BarracksDownloadException):
+      barracks_updater.download_package(package, destination)
 
-  # def test__build_payload_when_packages_in_device_info(self):
-  #   self.assertTrue(False)
+    # Then
+    create_file_mock.assert_not_called()
 
-  # def test__build_payload_when_packages_and_custom_client_data_in_device_info(self):
-  #   self.assertTrue(False)
+  @patch('__builtin__.open', new_callable=mock_open())
+  def test__create_file_and_verify_checksum__should__create_file__when_checksum_is_valid(self, open_mock):
+    # Given
+    response_content = '123'
+    http_response = Mock()
+    http_response.iter_content = Mock(return_value=iter([response_content]))
+    destination = '/tmp/plop'
+    checksum = hashlib.md5(response_content).hexdigest()
+
+    # When
+    barracks_updater = BarracksUpdater(self.api_key)
+    barracks_updater._create_file_and_verify_checksum(http_response, destination, checksum)
+
+    # Then
+    open_mock.assert_called_once_with(destination, 'wb')
+
+  def test__create_file_and_verify_checksum__should__raise_an_exception__when_checksum_is_invalid(self):
+    # Given
+    response_content = '123'
+    http_response = Mock()
+    http_response.iter_content = Mock(return_value=iter([response_content]))
+    destination = '/tmp/plop'
+    checksum = 'BaDch3Cksum'
+
+    # When # Then
+    barracks_updater = BarracksUpdater(self.api_key)
+    with self.assertRaises(BarracksChecksumException):
+      barracks_updater._create_file_and_verify_checksum(http_response, destination, checksum)
+

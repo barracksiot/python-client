@@ -39,6 +39,7 @@ class BarracksUpdater:
       verify = not self._allow_self_signed
     )
     if response.status_code == 200:
+      print response.json()
       return self._convert_to_packages(response.json())
     else:
       raise BarracksRequestException(response.request.body, response.text)
@@ -47,7 +48,7 @@ class BarracksUpdater:
     return {
       'availablePackages': list(map(lambda item: self._build_downloadable_package(item), json_response['available'])),
       'changedPackages': list(map(lambda item: self._build_downloadable_package(item), json_response['changed'])),
-      'unchangedPackages': list(map(lambda item: self._buildPackage(item), json_response['unchanged'])),
+      'unchangedPackages': list(map(lambda item: self._build_package(item), json_response['unchanged'])),
       'unavailableReferences': list(map(lambda item: item['reference'], json_response['unavailable']))
     }
 
@@ -62,7 +63,7 @@ class BarracksUpdater:
       self.download_package
     )
 
-  def _buildPackage(self, dictionary):
+  def _build_package(self, dictionary):
     return Package(
       dictionary['reference'],
       dictionary['version']
@@ -79,16 +80,17 @@ class BarracksUpdater:
       stream = True
     )
     if response.status_code == 200:
-      hash_md5 = hashlib.md5()
-      with open(destination, 'wb') as f:
-        for chunk in response.iter_content(1024):
-          f.write(chunk)
-          hash_md5.update(chunk)
-      if hash_md5.hexdigest() == package._md5:
-        return PackageFile(destination, package)
-      else:
-        os.remove(destination)
-        raise BarracksChecksumException(package)
+      self._create_file_and_verify_checksum(response, destination, package._md5)
+      return PackageFile(destination, package)
     else:
       raise BarracksDownloadException(response.request.body, response.text)
 
+  def _create_file_and_verify_checksum(self, http_response, destination, checksum):
+    hash_md5 = hashlib.md5()
+    with open(destination, 'wb') as f:
+      for chunk in http_response.iter_content(1024):
+        f.write(chunk)
+        hash_md5.update(chunk)
+    if hash_md5.hexdigest() != checksum:
+      os.remove(destination)
+      raise BarracksChecksumException(hash_md5.hexdigest(), checksum)
